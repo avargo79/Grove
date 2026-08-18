@@ -17,7 +17,11 @@ public sealed record RefBadgeViewModel(string Name, RefBadgeKind Kind)
 }
 
 /// <summary>One row of the commit list: the commit itself plus its precomputed graph layout.</summary>
-public sealed class CommitRowViewModel(Commit commit, GraphRow graphRow, double graphWidth)
+public sealed class CommitRowViewModel(
+    Commit commit,
+    GraphRow graphRow,
+    double graphWidth,
+    IReadOnlyDictionary<string, RefKind>? refKinds = null)
 {
     public Commit Commit { get; } = commit;
     public GraphRow GraphRow { get; } = graphRow;
@@ -34,11 +38,12 @@ public sealed class CommitRowViewModel(Commit commit, GraphRow graphRow, double 
     public string DateDisplay => RelativeTime.Format(Commit.AuthorDate);
     public string DateTooltip => Commit.AuthorDate.ToLocalTime().ToString("f", CultureInfo.CurrentCulture);
 
-    public IReadOnlyList<RefBadgeViewModel> Badges { get; } = BuildBadges(commit.RefNames);
+    public IReadOnlyList<RefBadgeViewModel> Badges { get; } = BuildBadges(commit.RefNames, refKinds);
 
     public bool HasBadges => Badges.Count > 0;
 
-    private static IReadOnlyList<RefBadgeViewModel> BuildBadges(IReadOnlyList<string> refNames)
+    private static IReadOnlyList<RefBadgeViewModel> BuildBadges(
+        IReadOnlyList<string> refNames, IReadOnlyDictionary<string, RefKind>? refKinds)
     {
         var badges = new List<RefBadgeViewModel>();
         foreach (var name in refNames)
@@ -50,15 +55,32 @@ public sealed class CommitRowViewModel(Commit commit, GraphRow graphRow, double 
                     => (RefBadgeKind.Tag, name["tag: ".Length..]),
                 _ when name.StartsWith("refs/stash", StringComparison.Ordinal)
                     => (RefBadgeKind.Stash, "stash"),
-                // Only remote-tracking refs carry a slash in the decoration.
-                _ when name.Contains('/') => (RefBadgeKind.RemoteBranch, name),
-                _ => (RefBadgeKind.LocalBranch, name),
+                _ => (ClassifyBranch(name, refKinds), name),
             };
             badges.Add(new RefBadgeViewModel(display, kind));
         }
 
         // HEAD first, then locals, then remotes and tags: most specific context nearest the subject.
         return [.. badges.OrderBy(b => b.Kind)];
+    }
+
+    /// <summary>
+    /// A slash does not imply a remote — "feature/login" is an ordinary local branch. The ref list
+    /// is authoritative; the slash heuristic is only a fallback when the ref has since disappeared.
+    /// </summary>
+    private static RefBadgeKind ClassifyBranch(string name, IReadOnlyDictionary<string, RefKind>? refKinds)
+    {
+        if (refKinds is not null && refKinds.TryGetValue(name, out var kind))
+        {
+            return kind switch
+            {
+                RefKind.RemoteBranch => RefBadgeKind.RemoteBranch,
+                RefKind.Tag => RefBadgeKind.Tag,
+                _ => RefBadgeKind.LocalBranch,
+            };
+        }
+
+        return name.Contains('/') ? RefBadgeKind.RemoteBranch : RefBadgeKind.LocalBranch;
     }
 
     private static string GetInitials(string name)

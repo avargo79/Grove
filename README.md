@@ -6,7 +6,7 @@ workflow is available under an MIT licence with no procurement barrier.
 Cross-platform (Windows, macOS, Linux) via Avalonia. Talks to your own `git` binary, so it honours
 your existing config, credential helpers, hooks and LFS setup exactly.
 
-![status](https://img.shields.io/badge/milestone-M1%20repository%20browser-blue)
+![GitFork showing a repository's commit graph, detail pane and diff](docs/screenshot.png)
 
 ## Current state
 
@@ -38,6 +38,14 @@ dotnet test
 The suite includes integration tests that create throwaway repositories in your temp directory and
 run the real `git` binary against them.
 
+## Screenshots
+
+The screenshot above is generated headlessly, so it can be refreshed without launching the app:
+
+```bash
+GITFORK_SCREENSHOT=docs/screenshot.png GITFORK_SCREENSHOT_REPO=/path/to/repo dotnet test tests/GitFork.App.Tests --filter WriteScreenshot
+```
+
 ## Static analysis
 
 `SonarAnalyzer.CSharp` and the .NET analyzers run on every build at `AnalysisMode=Recommended`, so
@@ -53,7 +61,8 @@ SONAR_TOKEN=… SONAR_HOST_URL=… ./scripts/sonar-scan.sh
 ```
 src/GitFork.Core   git process wrapper, output parsers, commit-graph layout (no UI dependencies)
 src/GitFork.App    Avalonia views, view models, custom graph renderer
-tests/             unit and integration tests
+tests/GitFork.Core.Tests  parser, graph-layout and real-git integration tests
+tests/GitFork.App.Tests   headless Avalonia tests that render the window and inspect pixels
 docs/SPEC.md       architecture and design rationale
 docs/ROADMAP.md    milestone plan
 ```

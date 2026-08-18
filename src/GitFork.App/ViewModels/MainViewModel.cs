@@ -49,6 +49,12 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public bool HasRepository => _repository is not null;
 
+    /// <summary>The in-flight detail load, exposed so tests can await selection side effects.</summary>
+    internal Task PendingDetailLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>The in-flight diff load, exposed so tests can await selection side effects.</summary>
+    internal Task PendingDiffLoad { get; private set; } = Task.CompletedTask;
+
     // ------------------------------------------------------------- commands
 
     [RelayCommand]
@@ -116,7 +122,7 @@ public sealed partial class MainViewModel : ViewModelBase
             CurrentBranch = await branchTask.ConfigureAwait(true) ?? "detached HEAD";
             var status = await statusTask.ConfigureAwait(true);
 
-            PopulateCommits(commits);
+            PopulateCommits(commits, refs);
             PopulateSidebar(refs);
 
             StatusMessage = BuildStatusLine(commits.Count, status);
@@ -131,9 +137,15 @@ public sealed partial class MainViewModel : ViewModelBase
         }
     }
 
-    private void PopulateCommits(IReadOnlyList<Commit> commits)
+    private void PopulateCommits(IReadOnlyList<Commit> commits, IReadOnlyList<GitRef> refs)
     {
         var rows = CommitGraphBuilder.Build(commits);
+
+        // Decoration names alone cannot distinguish "feature/login" from "origin/main",
+        // so badges are classified against the real ref list.
+        var refKinds = refs
+            .GroupBy(r => r.ShortName, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().Kind, StringComparer.Ordinal);
 
         // One shared column width keeps every row's lanes vertically aligned.
         var maxLanes = rows.Count == 0 ? 1 : rows.Max(r => r.LaneCount);
@@ -141,7 +153,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         Commits.Clear();
         for (var i = 0; i < commits.Count; i++)
-            Commits.Add(new CommitRowViewModel(commits[i], rows[i], graphWidth));
+            Commits.Add(new CommitRowViewModel(commits[i], rows[i], graphWidth, refKinds));
 
         SelectedCommit = Commits.FirstOrDefault();
     }
@@ -208,7 +220,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
     partial void OnSelectedCommitChanged(CommitRowViewModel? value)
     {
-        _ = LoadDetailAsync(value);
+        PendingDetailLoad = LoadDetailAsync(value);
     }
 
     private async Task LoadDetailAsync(CommitRowViewModel? row)
@@ -271,7 +283,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private void OnDetailPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(CommitDetailViewModel.SelectedFile) && sender is CommitDetailViewModel detail)
-            _ = LoadDiffAsync(detail.SelectedFile);
+            PendingDiffLoad = LoadDiffAsync(detail.SelectedFile);
     }
 
     private async Task LoadDiffAsync(FileChangeViewModel? file)

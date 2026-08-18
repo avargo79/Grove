@@ -27,4 +27,8 @@
   <ItemGroup>
     <ProjectReference Include="..\GitFork.Core\GitFork.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="GitFork.App.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@
     <Project Path="src/GitFork.Core/GitFork.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/GitFork.App.Tests/GitFork.App.Tests.csproj" />
     <Project Path="tests/GitFork.Core.Tests/GitFork.Core.Tests.csproj" />
   </Folder>
 </Solution>

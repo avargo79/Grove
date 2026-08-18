@@ -184,10 +184,14 @@
                       Background="{StaticResource PanelBackgroundBrush}"
                       IsVisible="{Binding Detail, Converter={x:Static ObjectConverters.IsNotNull}}">
 
-                    <DockPanel Grid.Column="0" DataContext="{Binding Detail}" x:DataType="vm:CommitDetailViewModel">
+                    <!-- Rows rather than a DockPanel: a long commit message must scroll inside its
+                         own band instead of pushing the changed-file list off the bottom. -->
+                    <Grid Grid.Column="0" DataContext="{Binding Detail}" x:DataType="vm:CommitDetailViewModel"
+                          RowDefinitions="Auto,Auto,*">
                         <!-- Commit metadata -->
-                        <Border DockPanel.Dock="Top" Padding="12,10"
+                        <Border Grid.Row="0" Padding="12,10" MaxHeight="220"
                                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <SelectableTextBlock Text="{Binding Body}"
@@ -205,14 +209,15 @@
                                                          Foreground="{StaticResource DimBrush}" FontSize="11" />
                                 </StackPanel>
                             </StackPanel>
+                        </ScrollViewer>
                         </Border>
 
                         <!-- Changed files -->
-                        <Border DockPanel.Dock="Top" Padding="12,6">
+                        <Border Grid.Row="1" Padding="12,6">
                             <TextBlock Text="{Binding FileCountDisplay}" Classes="sectionheader" />
                         </Border>
 
-                        <ListBox Classes="flat"
+                        <ListBox Grid.Row="2" Name="FileList" Classes="flat"
                                  ItemsSource="{Binding Files}"
                                  SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
                                  Background="Transparent" BorderThickness="0">
@@ -239,7 +244,7 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                    </DockPanel>
+                    </Grid>
 
                     <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
 

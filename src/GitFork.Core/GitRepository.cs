@@ -38,14 +38,29 @@ public sealed class GitRepository
     {
         var args = new List<string> { "log", "--topo-order", $"--pretty=format:{LogFormat}", $"--max-count={maxCount}" };
         if (allRefs)
-            args.Add("--all");
+        {
+            // Deliberately not "--all": that pulls in refs/stash, which would show the stash's
+            // internal commits inline in history. Stashes belong in the sidebar.
+            args.Add("--branches");
+            args.Add("--tags");
+            args.Add("--remotes");
+            args.Add("HEAD");
+        }
 
         var result = await _git.RunAsync(args, ct).ConfigureAwait(false);
         if (!result.Success)
         {
-            // A repository with no commits yet is not an error worth surfacing.
-            if (result.StdErr.Contains("does not have any commits", StringComparison.OrdinalIgnoreCase) ||
-                result.StdErr.Contains("bad default revision", StringComparison.OrdinalIgnoreCase))
+            // A repository with no commits yet is not an error worth surfacing: git reports the
+            // missing HEAD as an unknown or ambiguous revision.
+            string[] emptyRepositorySignals =
+            [
+                "does not have any commits",
+                "bad default revision",
+                "unknown revision",
+                "ambiguous argument",
+            ];
+            if (emptyRepositorySignals.Any(signal =>
+                    result.StdErr.Contains(signal, StringComparison.OrdinalIgnoreCase)))
                 return [];
             result.EnsureSuccess("git log");
         }
