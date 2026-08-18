@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+coverage*.xml
+TestResults/
+.DS_Store

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GitFork.App/GitFork.App.csproj" />
+    <Project Path="src/GitFork.Core/GitFork.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GitFork.Core.Tests/GitFork.Core.Tests.csproj" />
+  </Folder>
+</Solution>

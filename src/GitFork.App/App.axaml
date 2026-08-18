@@ -1,0 +1,145 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="GitFork.App.App"
+             xmlns:local="using:GitFork.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Surfaces -->
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1E1F22" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#26282C" />
+            <SolidColorBrush x:Key="RowBackgroundBrush" Color="#1E1F22" />
+            <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#2B2D30" />
+            <SolidColorBrush x:Key="BorderBrush" Color="#393B40" />
+
+            <!-- Text -->
+            <SolidColorBrush x:Key="ForegroundBrush" Color="#DFE1E5" />
+            <SolidColorBrush x:Key="MutedBrush" Color="#8B8F96" />
+            <SolidColorBrush x:Key="DimBrush" Color="#6B7079" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#3574F0" />
+
+            <!-- Change status -->
+            <SolidColorBrush x:Key="AddedBrush" Color="#6BC46D" />
+            <SolidColorBrush x:Key="DeletedBrush" Color="#F0736A" />
+            <SolidColorBrush x:Key="ModifiedBrush" Color="#D9A343" />
+            <SolidColorBrush x:Key="RenamedBrush" Color="#7C9EE8" />
+            <SolidColorBrush x:Key="ConflictBrush" Color="#E05D7C" />
+
+            <!-- Diff line backgrounds -->
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#16321F" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#3A1D1D" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#21262E" />
+            <SolidColorBrush x:Key="DiffGutterBrush" Color="#5A5F68" />
+
+            <!-- Ref badges -->
+            <SolidColorBrush x:Key="BadgeHeadBrush" Color="#2E5AAC" />
+            <SolidColorBrush x:Key="BadgeLocalBrush" Color="#3A4A63" />
+            <SolidColorBrush x:Key="BadgeRemoteBrush" Color="#3E4148" />
+            <SolidColorBrush x:Key="BadgeTagBrush" Color="#5A4A2A" />
+
+            <FontFamily x:Key="MonoFont">Cascadia Mono,Menlo,Consolas,DejaVu Sans Mono,monospace</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- Commit list rows: flat, tight, keyboard-friendly. -->
+        <Style Selector="ListBox.commits ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+
+        <Style Selector="ListBox.flat ListBoxItem">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="CornerRadius" Value="3" />
+        </Style>
+
+        <!-- Diff rows must not respond to hover/selection: the diff is read-only text. -->
+        <Style Selector="ListBox.diff ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.diff ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.diff ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <!-- Ref badge colours by kind. -->
+        <Style Selector="Border.badge">
+            <Setter Property="Background" Value="{StaticResource BadgeLocalBrush}" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Padding" Value="5,1" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.badge.head">
+            <Setter Property="Background" Value="{StaticResource BadgeHeadBrush}" />
+        </Style>
+        <Style Selector="Border.badge.remote">
+            <Setter Property="Background" Value="{StaticResource BadgeRemoteBrush}" />
+        </Style>
+        <Style Selector="Border.badge.tag">
+            <Setter Property="Background" Value="{StaticResource BadgeTagBrush}" />
+        </Style>
+
+        <!-- File status letters. -->
+        <Style Selector="TextBlock.status">
+            <Setter Property="Foreground" Value="{StaticResource ModifiedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.status.added">
+            <Setter Property="Foreground" Value="{StaticResource AddedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.status.deleted">
+            <Setter Property="Foreground" Value="{StaticResource DeletedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.status.renamed">
+            <Setter Property="Foreground" Value="{StaticResource RenamedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.status.conflict">
+            <Setter Property="Foreground" Value="{StaticResource ConflictBrush}" />
+        </Style>
+
+        <!-- Diff line backgrounds. -->
+        <Style Selector="Border.diffline.added">
+            <Setter Property="Background" Value="{StaticResource DiffAddedBackgroundBrush}" />
+        </Style>
+        <Style Selector="Border.diffline.removed">
+            <Setter Property="Background" Value="{StaticResource DiffRemovedBackgroundBrush}" />
+        </Style>
+        <Style Selector="Border.diffline.hunk">
+            <Setter Property="Background" Value="{StaticResource DiffHunkBackgroundBrush}" />
+        </Style>
+
+        <Style Selector="TextBlock.difftext.added">
+            <Setter Property="Foreground" Value="#9BDCA0" />
+        </Style>
+        <Style Selector="TextBlock.difftext.removed">
+            <Setter Property="Foreground" Value="#F5A6A0" />
+        </Style>
+        <Style Selector="TextBlock.difftext.hunk">
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        </Style>
+        <Style Selector="TextBlock.difftext.header">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+        </Style>
+
+        <Style Selector="TextBlock.sectionheader">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Application.Styles>
+</Application>
