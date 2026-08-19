@@ -30,11 +30,30 @@
                         Command="{Binding OpenRepositoryCommand}"
                         Content="Open Repository…" />
 
-                <Button Grid.Column="1"
-                        Margin="8,0,0,0"
-                        Command="{Binding RefreshCommand}"
-                        IsEnabled="{Binding HasRepository}"
-                        Content="Refresh" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,0" Spacing="4"
+                            IsVisible="{Binding HasRepository}">
+                    <Button Name="FetchButton" Content="Fetch"
+                            Command="{Binding Commands.FetchCommand}" />
+                    <SplitButton Name="PullButton" Content="Pull"
+                                 Command="{Binding Commands.PullCommand}">
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="Pull (rebase)" Command="{Binding Commands.PullRebaseCommand}" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+                    <SplitButton Name="PushButton" Content="Push"
+                                 Command="{Binding Commands.PushCommand}">
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="Force push (with lease)…"
+                                          Command="{Binding Commands.ForcePushCommand}" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+                    <Button Content="Stash" Command="{Binding Commands.StashPushCommand}" />
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+                </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal"
                             HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
@@ -44,8 +63,39 @@
                     <TextBlock Text="{Binding CurrentBranch}" Foreground="{StaticResource AccentBrush}" />
                 </StackPanel>
 
-                <ProgressBar Grid.Column="3" IsIndeterminate="True" Width="90" Height="3"
-                             IsVisible="{Binding IsBusy}" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Commands.ProgressText}"
+                               Foreground="{StaticResource MutedBrush}" FontSize="11"
+                               VerticalAlignment="Center" MaxWidth="260"
+                               TextTrimming="CharacterEllipsis" />
+                    <Button Content="Cancel" Classes="link" FontSize="11"
+                            Command="{Binding Commands.CancelNetworkOperationCommand}"
+                            IsVisible="{Binding Commands.IsNetworkOperationRunning}" />
+                    <ProgressBar IsIndeterminate="True" Width="90" Height="3"
+                                 IsVisible="{Binding IsBusy}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- In-progress merge or rebase: offer the way out before anything else -->
+        <Border DockPanel.Dock="Top" Name="ConflictBanner"
+                IsVisible="{Binding Commands.IsOperationInProgress}"
+                Background="#3A2A18"
+                BorderBrush="{StaticResource ModifiedBrush}" BorderThickness="0,0,0,1"
+                Padding="12,8">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <!-- One label in the star column: an Auto column sized this text to zero width
+                     because the binding had no source until a repository was opened. -->
+                <TextBlock Grid.Column="0" Name="BannerLabel"
+                           Text="{Binding Commands.BannerText}"
+                           Foreground="{StaticResource ForegroundBrush}"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1" Name="ContinueButton" Content="Continue"
+                        Command="{Binding Commands.ContinueOperationCommand}" Margin="8,0,6,0" />
+                <Button Grid.Column="2" Name="AbortButton" Content="Abort…"
+                        Command="{Binding Commands.AbortOperationCommand}" />
             </Grid>
         </Border>
 
@@ -56,8 +106,14 @@
                 BorderThickness="0,1,0,0"
                 Padding="10,4">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}"
-                           Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                    <TextBlock Name="OperationStatus" Text="{Binding Commands.StatusText}" FontSize="11"
+                               Classes="opstatus"
+                               Classes.error="{Binding Commands.IsError}"
+                               Classes.conflict="{Binding Commands.IsOperationInProgress}" />
+                </StackPanel>
                 <TextBlock Grid.Column="1" Text="{Binding RepositoryPath}"
                            Foreground="{StaticResource DimBrush}" FontSize="11"
                            TextTrimming="CharacterEllipsis" MaxWidth="500" />
@@ -85,6 +141,51 @@
                                         <ListBox.ItemTemplate>
                                             <DataTemplate DataType="vm:SidebarItemViewModel">
                                                 <Grid ColumnDefinitions="*,Auto" Margin="{Binding IndentMargin}">
+                                                    <Grid.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Checkout"
+                                                                      IsVisible="{Binding IsCheckoutable}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.CheckoutRefCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Merge into current branch"
+                                                                      IsVisible="{Binding CanBeMergedIn}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.MergeRefCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Rebase current branch onto this…"
+                                                                      IsVisible="{Binding CanBeMergedIn}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.RebaseOntoRefCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <Separator IsVisible="{Binding IsLocalBranch}" />
+                                                            <MenuItem Header="Rename…"
+                                                                      IsVisible="{Binding IsLocalBranch}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.RenameBranchCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Delete…"
+                                                                      IsVisible="{Binding IsLocalBranch}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.DeleteBranchCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Delete on remote…"
+                                                                      IsVisible="{Binding IsRemoteBranch}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.DeleteRemoteBranchCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Delete tag…"
+                                                                      IsVisible="{Binding IsTag}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.DeleteTagCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Apply"
+                                                                      IsVisible="{Binding IsStash}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.StashApplyCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Pop"
+                                                                      IsVisible="{Binding IsStash}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.StashPopCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Drop…"
+                                                                      IsVisible="{Binding IsStash}"
+                                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.StashDropCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                        </ContextMenu>
+                                                    </Grid.ContextMenu>
                                                     <TextBlock Grid.Column="0"
                                                                Text="{Binding DisplayName}"
                                                                TextTrimming="CharacterEllipsis"
@@ -142,6 +243,38 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="vm:CommitRowViewModel">
                             <Grid ColumnDefinitions="Auto,*,150,110,70" VerticalAlignment="Stretch">
+                                <Grid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Checkout this commit"
+                                                  Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.CheckoutCommitCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Create branch here…"
+                                                  Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.CreateBranchCommand}"
+                                                  CommandParameter="{Binding Sha}" />
+                                        <MenuItem Header="Create tag here…"
+                                                  Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.CreateTagCommand}"
+                                                  CommandParameter="{Binding Sha}" />
+                                        <Separator />
+                                        <MenuItem Header="Cherry-pick onto current branch"
+                                                  Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.CherryPickCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Revert"
+                                                  Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.RevertCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <Separator />
+                                        <MenuItem Header="Reset current branch to here">
+                                            <MenuItem Header="Soft — keep changes staged"
+                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.ResetSoftCommand}"
+                                                      CommandParameter="{Binding}" />
+                                            <MenuItem Header="Mixed — keep changes unstaged"
+                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.ResetMixedCommand}"
+                                                      CommandParameter="{Binding}" />
+                                            <MenuItem Header="Hard — discard all changes…"
+                                                      Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.ResetHardCommand}"
+                                                      CommandParameter="{Binding}" />
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
 
                                 <controls:GraphRowControl Grid.Column="0"
                                                           Row="{Binding GraphRow}"

@@ -33,19 +33,20 @@ The daily-driver loop.
 - [x] Commit box: message editor, amend toggle, recent-message recall
 - [x] File-system watcher so external changes refresh the view automatically
 
-## M3 — Branching and remote operations
+## M3 — Branching and remote operations ✅
 
-Next up.
-
-- [ ] Checkout, create, rename and delete branches from the sidebar
-- [ ] Fetch, pull and push with progress and cancellation
-- [ ] Credential-helper passthrough (no credentials ever handled in-process)
-- [ ] Merge and rebase onto, with conflict detection
-- [ ] Cherry-pick and revert from the commit context menu
-- [ ] Tag creation and deletion
-- [ ] Stash push / apply / pop / drop with a diff preview
+- [x] Checkout, create, rename and delete branches from the sidebar
+- [x] Fetch, pull (merge or rebase) and push with progress and cancellation
+- [x] Credential-helper passthrough (no credentials ever handled in-process)
+- [x] Merge and rebase onto, with conflict detection and a continue/abort banner
+- [x] Cherry-pick and revert from the commit context menu
+- [x] Reset (soft / mixed / hard) from the commit context menu
+- [x] Tag creation and deletion
+- [x] Stash push / apply / pop / drop with a diff preview
 
 ## M4 — Diff and history depth
+
+Next up.
 
 - [ ] Side-by-side diff view (*Side-by-Side Diff*)
 - [ ] Word-level intra-line highlighting

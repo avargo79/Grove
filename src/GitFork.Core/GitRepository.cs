@@ -21,10 +21,26 @@ public sealed class GitRepository
         RootPath = rootPath;
         _git = git;
         WorkingCopy = new GitWorkingCopy(git);
+        Refs = new GitRefOperations(git);
+        History = new GitHistoryOperations(git);
+        Remotes = new GitRemoteOperations(git);
+        Stashes = new GitStashOperations(git);
     }
 
     /// <summary>The write half of the API: staging, discarding and committing.</summary>
     public GitWorkingCopy WorkingCopy { get; }
+
+    /// <summary>Branch and tag lifecycle.</summary>
+    public GitRefOperations Refs { get; }
+
+    /// <summary>Merge, rebase, cherry-pick, revert and reset.</summary>
+    public GitHistoryOperations History { get; }
+
+    /// <summary>Fetch, pull and push.</summary>
+    public GitRemoteOperations Remotes { get; }
+
+    /// <summary>Stash lifecycle.</summary>
+    public GitStashOperations Stashes { get; }
 
     public string RootPath { get; }
     public string Name => Path.GetFileName(RootPath.TrimEnd(Path.DirectorySeparatorChar, '/'));

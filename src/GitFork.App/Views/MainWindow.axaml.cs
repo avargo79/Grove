@@ -21,6 +21,7 @@ public partial class MainWindow : Window
 
         vm.PickFolderAsync = PickRepositoryFolderAsync;
         vm.ConfirmAsync = ConfirmAsync;
+        vm.PromptAsync = PromptAsync;
     }
 
     /// <summary>Selecting the pinned row hands the lower pane to the working copy.</summary>
@@ -28,6 +29,50 @@ public partial class MainWindow : Window
     {
         if (DataContext is MainViewModel vm)
             vm.SelectWorkingCopy();
+    }
+
+    /// <summary>Modal single-line text prompt. Returns null when the user cancels.</summary>
+    private async Task<string?> PromptAsync(PromptRequest request)
+    {
+        string? value = null;
+
+        var input = new TextBox { Text = request.InitialValue };
+        var ok = new Button { Content = "OK", IsDefault = true };
+        var cancel = new Button { Content = "Cancel", IsCancel = true };
+
+        var dialog = new Window
+        {
+            Title = request.Title,
+            Width = 420,
+            SizeToContent = SizeToContent.Height,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            CanResize = false,
+        };
+
+        ok.Click += (_, _) => { value = input.Text; dialog.Close(); };
+        cancel.Click += (_, _) => dialog.Close();
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new Avalonia.Thickness(16),
+            Spacing = 12,
+            Children =
+            {
+                new TextBlock { Text = request.Message, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
+                input,
+                new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    Spacing = 8,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    Children = { cancel, ok },
+                },
+            },
+        };
+
+        dialog.Opened += (_, _) => input.Focus();
+        await dialog.ShowDialog(this);
+        return value;
     }
 
     /// <summary>Modal yes/no used before anything destructive, such as discarding changes.</summary>

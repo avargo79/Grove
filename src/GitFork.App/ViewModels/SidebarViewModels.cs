@@ -38,4 +38,18 @@ public sealed class SidebarItemViewModel(GitRef gitRef, string displayName, int 
     };
 
     public bool HasTracking => TrackingDisplay.Length > 0;
+
+    // Menu items bind to these so each ref kind offers only the actions that apply to it.
+    public bool IsLocalBranch => Kind == RefKind.LocalBranch;
+    public bool IsRemoteBranch => Kind == RefKind.RemoteBranch;
+    public bool IsTag => Kind == RefKind.Tag;
+    public bool IsStash => Kind == RefKind.Stash;
+
+    /// <summary>A remote's own header row, which is a grouping label rather than a ref.</summary>
+    public bool IsRemoteGroup => Kind == RefKind.Other;
+
+    public bool IsCheckoutable => IsLocalBranch || IsRemoteBranch || IsTag;
+
+    /// <summary>Merging or rebasing onto the branch you are already on is meaningless.</summary>
+    public bool CanBeMergedIn => (IsLocalBranch || IsRemoteBranch) && !IsHead;
 }

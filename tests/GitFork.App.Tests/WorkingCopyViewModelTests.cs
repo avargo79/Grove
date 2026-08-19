@@ -96,6 +96,22 @@ public class WorkingCopyViewModelTests
         Assert.Same(vm.Detail, vm.DetailContent);
     }
 
+    [Fact]
+    public async Task ARefreshDoesNotThrowTheUserOutOfTheWorkingCopyPane()
+    {
+        // The file watcher refreshes on every save, so this would otherwise bounce the user
+        // back to the commit view mid-edit.
+        using var fixture = CreateDirtyRepository();
+        var vm = await LoadAsync(fixture);
+        vm.SelectWorkingCopy();
+
+        await vm.RefreshCommand.ExecuteAsync(null);
+        await vm.PendingDetailLoad;
+
+        Assert.True(vm.IsWorkingCopySelected);
+        Assert.Same(vm.WorkingCopy, vm.DetailContent);
+    }
+
     // ---------------------------------------------------------- file lists
 
     [Fact]

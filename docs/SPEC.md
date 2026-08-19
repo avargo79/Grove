@@ -119,13 +119,37 @@ integration suite asserts on the resulting index contents rather than on the gen
 Patches go over stdin rather than through a temporary file so a cancelled operation leaves nothing
 behind.
 
-### 3.4 Refreshing
+### 3.4 Operations that can stop part-way
+
+A merge or rebase that hits conflicts has not failed — the user is now mid-operation and expected
+to resolve, then continue or abort. `OperationResult` models that directly, with outcomes of
+`Succeeded`, `Conflicted`, `Failed` and `Cancelled` (the user backing out of a confirmation), so
+conflicts never surface as exceptions or as red error text.
+
+`GitHistoryOperations.GetStateAsync` detects an in-progress operation from the marker files git
+leaves in `.git` (`MERGE_HEAD`, `rebase-merge/`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, `BISECT_LOG`)
+and lists the still-conflicted paths from the index. The UI turns that into a banner offering
+Continue or Abort.
+
+Two things this depends on:
+
+- **Editor suppression.** `GIT_EDITOR`, `GIT_SEQUENCE_EDITOR` and `EDITOR` are all pinned to
+  `true`. Without them `git rebase --continue`, `git merge` and `git commit` launch an editor and
+  block forever with nothing on screen to explain why.
+- **Credentials stay out of process.** `GIT_TERMINAL_PROMPT=0` means git may use the user's
+  credential helper but can never fall back to prompting on a terminal that does not exist. A
+  missing credential fails fast with an explanation rather than hanging the UI.
+
+Long-running network commands stream their stderr through `RunWithProgressAsync`, which splits on
+both `\n` and `\r` because git writes progress as carriage-return updates on a single line.
+
+### 3.5 Refreshing
 
 A debounced `RepositoryWatcher` watches the work tree and `.git`, coalescing bursts (editor
 autosaves, git's multi-file writes) into a single reload. The work-tree watcher ignores `.git`
 entirely — the dedicated watcher covers it, and git's lock files would otherwise fire constantly.
 
-### 3.5 Threading
+### 3.6 Threading
 
 All git calls are async over `Process`. Selection changes cancel the in-flight detail/diff load
 through a `CancellationTokenSource`, so holding an arrow key down does not queue up work.
@@ -139,7 +163,14 @@ through a `CancellationTokenSource`, so holding an arrow key down does not queue
 | `WorkingTreeStatus` | `git status --porcelain=v2 --branch -z -uall` |
 | `CommitDetail` | `git log -1 --format=%B` + `git diff-tree --root --name-status -r -M -z` |
 | `DiffLine` | `git show --format= --patch -M` → `DiffParser` |
+| `RepositoryState` | `.git` marker files + `git diff --diff-filter=U` |
+| `StashEntry` | `git stash list --format=…` (the reflog, not `for-each-ref`) |
+| `GitRemote` | `git remote -v` |
 | `FileDiff` / `DiffHunk` | `git diff [--cached] -M` → `DiffParser.ParseFiles` |
+
+The stash list comes from `git stash list` rather than `git for-each-ref`, because the latter only
+ever reports `refs/stash` — the top of the stack. Reading the reflog is what makes every stash
+addressable as `stash@{n}`.
 
 Porcelain v2 is used for status rather than v1 because it reports staged and unstaged state as
 separate fields, reports rename sources as their own NUL field, and carries branch/upstream headers
@@ -173,6 +204,7 @@ SonarQube or SonarCloud instance when one is configured.
 - The graph is built over the commits actually returned, so parents beyond the cap render as
   dangling lane ends.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- Write operations cover the working copy only: staging, discarding and committing. Branching,
-  fetching and pushing are M3.
+- Interactive rebase, blame and file history are not implemented yet (M4/M5).
+- Conflict resolution hands off to the user's own editor or `merge.tool`; there is no built-in
+  three-way merge view.
 - Discarding changes is genuinely destructive and is always gated behind a confirmation dialog.

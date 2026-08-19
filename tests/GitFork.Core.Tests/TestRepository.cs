@@ -28,6 +28,28 @@ public sealed class TestRepository : IDisposable
         return repo;
     }
 
+    /// <summary>
+    /// A bare repository to act as a remote. Using a local path exercises the whole fetch/push
+    /// code path without needing a server or any credentials.
+    /// </summary>
+    public static TestRepository CreateBareRemote()
+    {
+        var path = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(), "gitfork-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+
+        var repo = new TestRepository(path);
+        repo.Git("init", "--quiet", "--bare", "--initial-branch=main");
+        return repo;
+    }
+
+    /// <summary>Points this repository at another one as "origin" and fetches from it.</summary>
+    public void AddRemote(TestRepository remote, string name = "origin")
+    {
+        Git("remote", "add", name, remote.Path);
+        Git("fetch", "--quiet", name);
+    }
+
     /// <summary>Runs git in the repository and fails the test if it errors.</summary>
     public string Git(params string[] args)
     {

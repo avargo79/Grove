@@ -25,6 +25,9 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
     /// <summary>Set by the view; shows a modal yes/no. Required before anything destructive.</summary>
     public Func<string, Task<bool>>? ConfirmAsync { get; set; }
 
+    /// <summary>Set by the view; asks the user for one line of text. Null when cancelled.</summary>
+    public Func<PromptRequest, Task<string?>>? PromptAsync { get; set; }
+
     public ObservableCollection<CommitRowViewModel> Commits { get; } = [];
     public ObservableCollection<SidebarSectionViewModel> Sections { get; } = [];
 
@@ -51,6 +54,10 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     public partial WorkingCopyViewModel? WorkingCopy { get; set; }
+
+    /// <summary>Repository-level actions: fetch/pull/push, branches, tags, history, stashes.</summary>
+    [ObservableProperty]
+    public partial RepositoryCommandsViewModel? Commands { get; set; }
 
     /// <summary>True while the pinned "Uncommitted changes" row owns the detail pane.</summary>
     [ObservableProperty]
@@ -114,6 +121,15 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
             _repository = repository;
             WorkingCopy = new WorkingCopyViewModel(repository) { ConfirmDiscardAsync = ConfirmAsync };
             WorkingCopy.RepositoryChanged += OnRepositoryChanged;
+
+            Commands?.Dispose();
+            Commands = new RepositoryCommandsViewModel(repository)
+            {
+                ConfirmAsync = ConfirmAsync,
+                PromptAsync = PromptAsync,
+            };
+            Commands.RepositoryChanged += OnRepositoryChanged;
+
             StartWatching(repository.RootPath);
             RepositoryPath = repository.RootPath;
             RepositoryName = repository.Name;
@@ -142,18 +158,23 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
             var refsTask = repository.GetRefsAsync();
             var branchTask = repository.GetCurrentBranchAsync();
             var statusTask = repository.GetStatusAsync();
+            var stashesTask = repository.Stashes.GetStashesAsync();
 
             var commits = await commitsTask.ConfigureAwait(true);
             var refs = await refsTask.ConfigureAwait(true);
             CurrentBranch = await branchTask.ConfigureAwait(true) ?? "detached HEAD";
             var status = await statusTask.ConfigureAwait(true);
+            var stashes = await stashesTask.ConfigureAwait(true);
 
             PopulateCommits(commits, refs);
-            PopulateSidebar(refs);
+            PopulateSidebar(refs, stashes);
 
             Status = status;
             OnPropertyChanged(nameof(HasUncommittedChanges));
             OnPropertyChanged(nameof(UncommittedSummary));
+
+            if (Commands is { } commands)
+                await commands.RefreshStateAsync().ConfigureAwait(true);
 
             if (WorkingCopy is { } workingCopy)
                 await workingCopy.LoadAsync(status).ConfigureAwait(true);
@@ -189,6 +210,7 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         var graphWidth = Math.Max(maxLanes, 1) * GraphRowControl.LaneWidth;
 
         var previouslySelected = SelectedCommit?.Sha;
+        var wasOnWorkingCopy = IsWorkingCopySelected;
 
         Commits.Clear();
         for (var i = 0; i < commits.Count; i++)
@@ -196,9 +218,14 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
         // Keep the user on the same commit across a refresh rather than jumping to the top.
         SelectedCommit = Commits.FirstOrDefault(c => c.Sha == previouslySelected) ?? Commits.FirstOrDefault();
+
+        // Assigning SelectedCommit hands the lower pane back to the commit view. With the file
+        // watcher running, that would throw the user out of the staging pane on every save.
+        if (wasOnWorkingCopy)
+            IsWorkingCopySelected = true;
     }
 
-    private void PopulateSidebar(IReadOnlyList<GitRef> refs)
+    private void PopulateSidebar(IReadOnlyList<GitRef> refs, IReadOnlyList<StashEntry> stashes)
     {
         Sections.Clear();
 
@@ -227,10 +254,26 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
             tags.Items.Add(new SidebarItemViewModel(r, r.ShortName));
         AddIfPopulated(tags);
 
-        var stashes = new SidebarSectionViewModel("Stashes");
-        foreach (var r in refs.Where(r => r.Kind == RefKind.Stash))
-            stashes.Items.Add(new SidebarItemViewModel(r, r.ShortName));
-        AddIfPopulated(stashes);
+        // "git for-each-ref" only ever reports refs/stash, which is the top of the stack, so the
+        // stash list is read from the reflog instead: otherwise only one stash is ever visible
+        // and every apply/pop/drop would target stash@{0}.
+        var stashSection = new SidebarSectionViewModel("Stashes");
+        foreach (var stash in stashes)
+        {
+            var stashRef = new GitRef(
+                FullName: stash.Reference,
+                ShortName: stash.DisplayMessage,
+                Kind: RefKind.Stash,
+                TargetSha: string.Empty,
+                Upstream: null,
+                Ahead: 0,
+                Behind: 0,
+                IsHead: false);
+
+            stashSection.Items.Add(new SidebarItemViewModel(stashRef, stash.DisplayMessage));
+        }
+
+        AddIfPopulated(stashSection);
     }
 
     private void AddIfPopulated(SidebarSectionViewModel section)
@@ -308,6 +351,7 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         _watcher = null;
         _detailCts?.Dispose();
         _detailCts = null;
+        Commands?.Dispose();
     }
 
     private async Task LoadDetailAsync(CommitRowViewModel? row)

@@ -12,9 +12,14 @@ The staging pane, with hunk- and line-level staging:
 
 ![The working copy pane with staged and unstaged files, a diff and the commit box](docs/screenshot-staging.png)
 
+A conflicted merge, with the way out offered up front:
+
+![A merge in progress, with a banner offering Continue or Abort](docs/screenshot-conflict.png)
+
 ## Current state
 
-Milestones 1 and 2 are complete: browsing history, and the full staging and commit loop.
+Milestones 1 to 3 are complete: browsing history, the full staging and commit loop, and
+branching, merging and remote operations.
 
 **Browsing**
 
@@ -31,7 +36,15 @@ Milestones 1 and 2 are complete: browsing history, and the full staging and comm
 - Commit box with an amend toggle and recent-message recall
 - Automatic refresh when the repository changes on disk
 
-Branching, fetching and pushing are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Branches, remotes and history**
+
+- Fetch, pull (merge or rebase) and push, with streamed progress and cancellation
+- Checkout, create, rename and delete branches; create and delete tags
+- Merge and rebase, with a banner offering Continue or Abort while conflicts remain
+- Cherry-pick, revert and reset from the commit context menu
+- Stash push, apply, pop and drop
+
+Side-by-side diffs, blame and interactive rebase are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Running it
 
@@ -80,6 +93,12 @@ tests/GitFork.App.Tests   headless Avalonia tests that render the window and ins
 docs/SPEC.md       architecture and design rationale
 docs/ROADMAP.md    milestone plan
 ```
+
+## Credentials
+
+GitFork never handles your credentials. Git is run with terminal prompting disabled, so
+authentication comes from your existing credential helper or SSH key — and a missing credential
+fails immediately with an explanation instead of hanging.
 
 ## Licence
 
