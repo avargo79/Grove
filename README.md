@@ -129,6 +129,29 @@ conflict banner builds its own throwaway repository:
 GROVE_SCREENSHOT_CONFLICT=docs/screenshot-conflict.png dotnet test tests/Grove.App.Tests --filter WriteConflictScreenshot
 ```
 
+## Installing
+
+No package manager, no installer, no administrator rights, and nothing written outside your own
+home directory:
+
+```bash
+./scripts/install-local.sh
+```
+
+On macOS that puts `Grove.app` in `~/Applications`, which Spotlight and Launchpad index the same
+as the system folder. On Linux it installs under `~/.local/share/grove` with a `grove` launcher
+and a desktop entry. On Windows (from Git Bash) it installs to `%LOCALAPPDATA%\Programs\Grove` —
+the path a per-user installer would use, and so the one most likely to already be permitted where
+execution policy restricts it.
+
+The build is self-contained, so the machine needs no .NET runtime — only `git` on `PATH`, since
+Grove drives your own git rather than reimplementing it. Building needs the .NET SDK, which also
+installs per-user without administrator rights:
+
+```bash
+curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 10.0
+```
+
 ## The icon
 
 The grove mark is drawn in code, in [GroveIcon](src/Grove.App/Controls/GroveIcon.cs), so one

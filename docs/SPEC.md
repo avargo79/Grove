@@ -296,6 +296,10 @@ SonarQube or SonarCloud instance when one is configured.
   Avalonia hands back `Rgba8888` on some platforms and `Bgra8888` on others, and the mistake is
   nearly invisible: brightness, saturation and "these regions differ" all survive a red/blue
   swap, so it only surfaces when a test compares against a literal colour.
+- Installing is a copy into the user's own directories, never a system path: no administrator
+  rights, no package manager, no service. On a managed machine the binding constraint is usually
+  execution policy (macOS MDM allowlisting, Windows AppLocker/WDAC), which building from source
+  does not change — so the installer says so plainly rather than failing opaquely.
 - The application icon is drawn rather than stored: a control renders it at each size the
   platforms ask for, and `scripts/make-icons.sh` packs those into `.png`, `.ico` and `.icns`. The
   packed files are committed so the build needs no Mac and no image tooling.
