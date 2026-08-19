@@ -104,6 +104,12 @@
     <Application.Styles>
         <FluentTheme />
 
+        <!-- Every window carries the mark, not just the main one: on Windows each top-level
+             window gets its own taskbar entry, and an unset icon there falls back to a blank. -->
+        <Style Selector="Window">
+            <Setter Property="Icon" Value="/Assets/grove.png" />
+        </Style>
+
         <!-- Commit list rows: flat, tight, keyboard-friendly. -->
         <Style Selector="ListBox.commits ListBoxItem">
             <Setter Property="Padding" Value="0" />

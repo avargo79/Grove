@@ -62,10 +62,14 @@ case "$RID" in
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleExecutable</key><string>Grove.App</string>
   <key>LSMinimumSystemVersion</key><string>11.0</string>
+  <key>CFBundleIconFile</key><string>grove</string>
   <key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
 PLIST
+
+    mkdir -p "$APP/Contents/Resources"
+    cp src/Grove.App/Assets/grove.icns "$APP/Contents/Resources/grove.icns"
 
     cp -R "$STAGE/." "$APP/Contents/MacOS/"
     rm -rf "$STAGE"

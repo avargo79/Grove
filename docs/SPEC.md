@@ -284,6 +284,9 @@ SonarQube or SonarCloud instance when one is configured.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
 - The file tree builds its nesting from git's flat path list; git has no notion of a folder object
   to read here.
+- The application icon is drawn rather than stored: a control renders it at each size the
+  platforms ask for, and `scripts/make-icons.sh` packs those into `.png`, `.ico` and `.icns`. The
+  packed files are committed so the build needs no Mac and no image tooling.
 - On macOS the published build is a `.app` bundle rather than a bare executable: recent macOS
   kills an adhoc-signed loose binary on launch with no crash report and nothing in the log.
 - The Windows and Linux builds have been produced but never launched; only the macOS bundle was

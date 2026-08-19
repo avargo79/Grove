@@ -129,6 +129,20 @@ conflict banner builds its own throwaway repository:
 GROVE_SCREENSHOT_CONFLICT=docs/screenshot-conflict.png dotnet test tests/Grove.App.Tests --filter WriteConflictScreenshot
 ```
 
+## The icon
+
+The grove mark is drawn in code, in [GroveIcon](src/Grove.App/Controls/GroveIcon.cs), so one
+definition covers every size from a 16px tray glyph to a 1024px macOS icon with no resampling in
+between. After changing it, repack the assets:
+
+```bash
+./scripts/make-icons.sh
+```
+
+That rasterises the control and writes `grove.png` (the window icon), `grove.ico` (stamped into
+the Windows executable) and `grove.icns` (the macOS bundle). The outputs are committed, so an
+ordinary build or publish needs neither the script nor a Mac.
+
 ## Static analysis
 
 `SonarAnalyzer.CSharp` and the .NET analyzers run on every build at `AnalysisMode=Recommended`, so

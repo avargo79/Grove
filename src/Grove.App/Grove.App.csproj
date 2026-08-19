@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Stamped into the Windows executable itself, which is what Explorer shows. -->
+    <ApplicationIcon>Assets\grove.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
