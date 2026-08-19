@@ -8,16 +8,30 @@ your existing config, credential helpers, hooks and LFS setup exactly.
 
 ![GitFork showing a repository's commit graph, detail pane and diff](docs/screenshot.png)
 
+The staging pane, with hunk- and line-level staging:
+
+![The working copy pane with staged and unstaged files, a diff and the commit box](docs/screenshot-staging.png)
+
 ## Current state
 
-Milestone 1 is complete: a read-only repository browser.
+Milestones 1 and 2 are complete: browsing history, and the full staging and commit loop.
+
+**Browsing**
 
 - Coloured, laned commit graph with merge rings and branch/tag badges
 - Sidebar of local branches, remotes, tags and stashes with ahead/behind indicators
 - Commit detail pane with the full message and changed-file list
 - Unified diff with per-side line numbers and add/remove colouring
 
-Nothing in the UI writes to your repository yet. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Working copy**
+
+- "Uncommitted changes" pinned at the top of the history, as Fork does
+- Staged / unstaged split, with stage, unstage and discard
+- Hunk-level and line-level staging
+- Commit box with an amend toggle and recent-message recall
+- Automatic refresh when the repository changes on disk
+
+Branching, fetching and pushing are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Running it
 

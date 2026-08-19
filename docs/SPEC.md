@@ -98,7 +98,34 @@ rather than the total branch count.
 `GraphRowControl` renders one row: straight lines for same-lane segments, cubic béziers for lane
 changes, a filled dot for a normal commit and a hollow ring for a merge.
 
-### 3.3 Threading
+### 3.3 Staging a selection of lines
+
+Git has no "stage these lines" command. Partial staging works by describing the selection as a
+patch and feeding it to `git apply --cached` over stdin, which is what `PatchBuilder` produces.
+
+The rules follow from which side of the index git is matching against:
+
+- **Staging** applies forward, so the file on disk is the "new" side and the index is the "old"
+  side. An unselected addition is simply left out of the patch; an unselected *removal* has to be
+  rewritten as a context line, because that line stays in the index.
+- **Unstaging** reverse-applies against the index, so the roles swap and so do the rules: an
+  unselected addition becomes context, an unselected removal is dropped.
+
+Hunk headers are then recomputed from the rewritten line counts, and each emitted hunk shifts the
+far side's numbering by the running delta of everything already in the patch. Getting this wrong
+produces a patch that either fails to apply or silently stages the wrong lines, which is why the
+integration suite asserts on the resulting index contents rather than on the generated patch text.
+
+Patches go over stdin rather than through a temporary file so a cancelled operation leaves nothing
+behind.
+
+### 3.4 Refreshing
+
+A debounced `RepositoryWatcher` watches the work tree and `.git`, coalescing bursts (editor
+autosaves, git's multi-file writes) into a single reload. The work-tree watcher ignores `.git`
+entirely — the dedicated watcher covers it, and git's lock files would otherwise fire constantly.
+
+### 3.5 Threading
 
 All git calls are async over `Process`. Selection changes cancel the in-flight detail/diff load
 through a `CancellationTokenSource`, so holding an arrow key down does not queue up work.
@@ -112,6 +139,7 @@ through a `CancellationTokenSource`, so holding an arrow key down does not queue
 | `WorkingTreeStatus` | `git status --porcelain=v2 --branch -z -uall` |
 | `CommitDetail` | `git log -1 --format=%B` + `git diff-tree --root --name-status -r -M -z` |
 | `DiffLine` | `git show --format= --patch -M` → `DiffParser` |
+| `FileDiff` / `DiffHunk` | `git diff [--cached] -M` → `DiffParser.ParseFiles` |
 
 Porcelain v2 is used for status rather than v1 because it reports staged and unstaged state as
 separate fields, reports rename sources as their own NUL field, and carries branch/upstream headers
@@ -119,7 +147,7 @@ inline — all three of which v1 forces you to infer.
 
 ## 5. Testing strategy
 
-Two layers, both in `GitFork.Core.Tests`:
+Three layers:
 
 - **Unit tests** over the pure functions: graph layout, diff parsing, and the porcelain parsers.
   These pin down behaviour that is easy to break silently — line numbering across hunks, rename
@@ -127,7 +155,13 @@ Two layers, both in `GitFork.Core.Tests`:
 - **Integration tests** that build a real throwaway repository in a temp directory and run the real
   git binary against it (`TestRepository`). These exist so that a change in git's output format
   fails the build rather than the app. They cover merges, renames, stashes, detached HEAD, binary
-  files, untracked directories and paths containing spaces.
+  files, untracked directories and paths containing spaces. The write path is covered the same way:
+  every staging test asserts on the resulting **index contents**, not on the patch text, so a patch
+  that applies but stages the wrong thing still fails.
+- **Headless UI tests** in `GitFork.App.Tests` boot the real application on Avalonia's headless
+  platform with Skia, so the actual XAML, styles and custom controls are exercised. They assert on
+  the realised visual tree, on layout (does the file list still fit on screen?), and on captured
+  pixels. `ScreenshotGenerator` reuses the same path to produce the images in this repository.
 
 Static analysis runs on every build via `SonarAnalyzer.CSharp` plus the .NET analyzers at
 `AnalysisMode=Recommended`. `scripts/sonar-scan.sh` drives the full scanner against a real
@@ -139,4 +173,6 @@ SonarQube or SonarCloud instance when one is configured.
 - The graph is built over the commits actually returned, so parents beyond the cap render as
   dangling lane ends.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- The app is read-only today. No command in the UI writes to the repository.
+- Write operations cover the working copy only: staging, discarding and committing. Branching,
+  fetching and pushing are M3.
+- Discarding changes is genuinely destructive and is always gated behind a confirmation dialog.

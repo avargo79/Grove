@@ -5,7 +5,8 @@ using GitFork.Core;
 namespace GitFork.App.ViewModels;
 
 /// <summary>A changed file in the selected commit.</summary>
-public sealed class FileChangeViewModel(FileChange change)
+// Not sealed: WorkingFileViewModel extends it with which side of the index it sits on.
+public class FileChangeViewModel(FileChange change)
 {
     public FileChange Change { get; } = change;
     public string FileName => Change.FileName;
@@ -59,8 +60,10 @@ public sealed class DiffLineViewModel(DiffLine line)
 }
 
 /// <summary>The detail pane: commit metadata, its file list, and the diff for the selected file.</summary>
-public sealed partial class CommitDetailViewModel : ViewModelBase
+public sealed partial class CommitDetailViewModel(GitRepository repository) : ViewModelBase
 {
+    private CancellationTokenSource? _diffCts;
+
     public required Commit Commit { get; init; }
     public required string Body { get; init; }
     public required IReadOnlyList<FileChangeViewModel> Files { get; init; }
@@ -68,6 +71,53 @@ public sealed partial class CommitDetailViewModel : ViewModelBase
     /// <summary>Drives the diff pane; owned here so the file list binds straight to it.</summary>
     [ObservableProperty]
     public partial FileChangeViewModel? SelectedFile { get; set; }
+
+    public System.Collections.ObjectModel.ObservableCollection<DiffLineViewModel> DiffLines { get; } = [];
+
+    /// <summary>The in-flight diff load, exposed so tests can await selection side effects.</summary>
+    internal Task PendingDiffLoad { get; private set; } = Task.CompletedTask;
+
+    partial void OnSelectedFileChanged(FileChangeViewModel? value)
+    {
+        PendingDiffLoad = LoadDiffAsync(value);
+    }
+
+    private async Task LoadDiffAsync(FileChangeViewModel? file)
+    {
+        // Arrowing through the file list must not queue up a load per keystroke.
+        if (_diffCts is { } previous)
+        {
+            await previous.CancelAsync().ConfigureAwait(true);
+            previous.Dispose();
+        }
+
+        DiffLines.Clear();
+        if (file is null)
+        {
+            _diffCts = null;
+            return;
+        }
+
+        var cts = new CancellationTokenSource();
+        _diffCts = cts;
+
+        try
+        {
+            var lines = await repository
+                .GetCommitFileDiffAsync(Commit.Sha, file.Change, ct: cts.Token)
+                .ConfigureAwait(true);
+
+            if (cts.IsCancellationRequested)
+                return;
+
+            foreach (var line in lines)
+                DiffLines.Add(new DiffLineViewModel(line));
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer selection.
+        }
+    }
 
     public string Subject => Commit.Subject;
     public string Sha => Commit.Sha;

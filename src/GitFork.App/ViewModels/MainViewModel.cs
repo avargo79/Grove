@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using GitFork.App.Controls;
 using GitFork.Core;
@@ -8,15 +8,22 @@ using GitFork.Core.Graph;
 
 namespace GitFork.App.ViewModels;
 
-public sealed partial class MainViewModel : ViewModelBase
+public sealed partial class MainViewModel : ViewModelBase, IDisposable
 {
     private const int CommitPageSize = 2000;
 
     private GitRepository? _repository;
     private CancellationTokenSource? _detailCts;
+    private RepositoryWatcher? _watcher;
+
+    /// <summary>Set to false in tests, where the watcher would fire during assertions.</summary>
+    public bool WatchForChanges { get; init; } = true;
 
     /// <summary>Set by the view; opens a native folder picker and returns the chosen path.</summary>
     public Func<Task<string?>>? PickFolderAsync { get; set; }
+
+    /// <summary>Set by the view; shows a modal yes/no. Required before anything destructive.</summary>
+    public Func<string, Task<bool>>? ConfirmAsync { get; set; }
 
     public ObservableCollection<CommitRowViewModel> Commits { get; } = [];
     public ObservableCollection<SidebarSectionViewModel> Sections { get; } = [];
@@ -42,18 +49,34 @@ public sealed partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public partial CommitDetailViewModel? Detail { get; set; }
 
-    public ObservableCollection<DiffLineViewModel> DiffLines { get; } = [];
+    [ObservableProperty]
+    public partial WorkingCopyViewModel? WorkingCopy { get; set; }
+
+    /// <summary>True while the pinned "Uncommitted changes" row owns the detail pane.</summary>
+    [ObservableProperty]
+    public partial bool IsWorkingCopySelected { get; set; }
 
     [ObservableProperty]
-    public partial bool IsDiffLoading { get; set; }
+    public partial WorkingTreeStatus Status { get; set; } = WorkingTreeStatus.Empty;
+
+    /// <summary>Whatever the lower pane is currently showing: a commit, or the working copy.</summary>
+    public object? DetailContent => IsWorkingCopySelected ? WorkingCopy : Detail;
+
+    public bool HasUncommittedChanges => !Status.IsClean;
+
+    public string UncommittedSummary => Status.TotalChanges == 1
+        ? "1 changed file"
+        : $"{Status.TotalChanges} changed files";
+
+
 
     public bool HasRepository => _repository is not null;
 
     /// <summary>The in-flight detail load, exposed so tests can await selection side effects.</summary>
     internal Task PendingDetailLoad { get; private set; } = Task.CompletedTask;
 
-    /// <summary>The in-flight diff load, exposed so tests can await selection side effects.</summary>
-    internal Task PendingDiffLoad { get; private set; } = Task.CompletedTask;
+    /// <summary>The in-flight diff load of the selected commit, for tests to await.</summary>
+    internal Task PendingDiffLoad => Detail?.PendingDiffLoad ?? Task.CompletedTask;
 
     // ------------------------------------------------------------- commands
 
@@ -89,6 +112,9 @@ public sealed partial class MainViewModel : ViewModelBase
             }
 
             _repository = repository;
+            WorkingCopy = new WorkingCopyViewModel(repository) { ConfirmDiscardAsync = ConfirmAsync };
+            WorkingCopy.RepositoryChanged += OnRepositoryChanged;
+            StartWatching(repository.RootPath);
             RepositoryPath = repository.RootPath;
             RepositoryName = repository.Name;
             OnPropertyChanged(nameof(HasRepository));
@@ -125,6 +151,17 @@ public sealed partial class MainViewModel : ViewModelBase
             PopulateCommits(commits, refs);
             PopulateSidebar(refs);
 
+            Status = status;
+            OnPropertyChanged(nameof(HasUncommittedChanges));
+            OnPropertyChanged(nameof(UncommittedSummary));
+
+            if (WorkingCopy is { } workingCopy)
+                await workingCopy.LoadAsync(status).ConfigureAwait(true);
+
+            // A commit or a discard can leave nothing to show; fall back to the newest commit.
+            if (IsWorkingCopySelected && status.IsClean)
+                SelectCommitRow(Commits.FirstOrDefault());
+
             StatusMessage = BuildStatusLine(commits.Count, status);
         }
         catch (GitException ex)
@@ -151,11 +188,14 @@ public sealed partial class MainViewModel : ViewModelBase
         var maxLanes = rows.Count == 0 ? 1 : rows.Max(r => r.LaneCount);
         var graphWidth = Math.Max(maxLanes, 1) * GraphRowControl.LaneWidth;
 
+        var previouslySelected = SelectedCommit?.Sha;
+
         Commits.Clear();
         for (var i = 0; i < commits.Count; i++)
             Commits.Add(new CommitRowViewModel(commits[i], rows[i], graphWidth, refKinds));
 
-        SelectedCommit = Commits.FirstOrDefault();
+        // Keep the user on the same commit across a refresh rather than jumping to the top.
+        SelectedCommit = Commits.FirstOrDefault(c => c.Sha == previouslySelected) ?? Commits.FirstOrDefault();
     }
 
     private void PopulateSidebar(IReadOnlyList<GitRef> refs)
@@ -220,7 +260,54 @@ public sealed partial class MainViewModel : ViewModelBase
 
     partial void OnSelectedCommitChanged(CommitRowViewModel? value)
     {
+        if (value is not null)
+            IsWorkingCopySelected = false;
         PendingDetailLoad = LoadDetailAsync(value);
+    }
+
+    partial void OnIsWorkingCopySelectedChanged(bool value) => OnPropertyChanged(nameof(DetailContent));
+
+    partial void OnDetailChanged(CommitDetailViewModel? value) => OnPropertyChanged(nameof(DetailContent));
+
+    partial void OnWorkingCopyChanged(WorkingCopyViewModel? value) => OnPropertyChanged(nameof(DetailContent));
+
+    /// <summary>Switches the lower pane to the working copy, as the pinned row does.</summary>
+    [RelayCommand]
+    public void SelectWorkingCopy()
+    {
+        SelectedCommit = null;
+        IsWorkingCopySelected = true;
+    }
+
+    private void SelectCommitRow(CommitRowViewModel? row)
+    {
+        IsWorkingCopySelected = false;
+        SelectedCommit = row;
+    }
+
+    private void OnRepositoryChanged(object? sender, EventArgs e) => _ = RefreshAsync();
+
+    /// <summary>Reloads when the repository changes underneath us — an editor save, a terminal commit.</summary>
+    private void StartWatching(string rootPath)
+    {
+        _watcher?.Dispose();
+        _watcher = null;
+
+        if (!WatchForChanges)
+            return;
+
+        var watcher = new RepositoryWatcher(rootPath);
+        watcher.Changed += (_, _) => Dispatcher.UIThread.Post(() => _ = RefreshAsync());
+        watcher.Start();
+        _watcher = watcher;
+    }
+
+    public void Dispose()
+    {
+        _watcher?.Dispose();
+        _watcher = null;
+        _detailCts?.Dispose();
+        _detailCts = null;
     }
 
     private async Task LoadDetailAsync(CommitRowViewModel? row)
@@ -234,7 +321,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
         _detailCts = null;
 
-        DiffLines.Clear();
         DetachDetail();
 
         if (_repository is null || row is null)
@@ -252,14 +338,13 @@ public sealed partial class MainViewModel : ViewModelBase
             if (cts.IsCancellationRequested)
                 return;
 
-            var vm = new CommitDetailViewModel
+            var vm = new CommitDetailViewModel(_repository)
             {
                 Commit = detail.Commit,
                 Body = detail.Body,
                 Files = [.. detail.Files.Select(f => new FileChangeViewModel(f))],
             };
 
-            vm.PropertyChanged += OnDetailPropertyChanged;
             Detail = vm;
             vm.SelectedFile = vm.Files.Count > 0 ? vm.Files[0] : null;
         }
@@ -274,51 +359,8 @@ public sealed partial class MainViewModel : ViewModelBase
         }
     }
 
-    private void DetachDetail()
-    {
-        if (Detail is { } previous)
-            previous.PropertyChanged -= OnDetailPropertyChanged;
-    }
+    private void DetachDetail() => Detail = null;
 
-    private void OnDetailPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(CommitDetailViewModel.SelectedFile) && sender is CommitDetailViewModel detail)
-            PendingDiffLoad = LoadDiffAsync(detail.SelectedFile);
-    }
-
-    private async Task LoadDiffAsync(FileChangeViewModel? file)
-    {
-        DiffLines.Clear();
-        if (_repository is null || file is null || Detail is null)
-            return;
-
-        var token = _detailCts?.Token ?? CancellationToken.None;
-        IsDiffLoading = true;
-        try
-        {
-            var lines = await _repository
-                .GetCommitFileDiffAsync(Detail.Sha, file.Change, ct: token)
-                .ConfigureAwait(true);
-
-            if (token.IsCancellationRequested)
-                return;
-
-            foreach (var line in lines)
-                DiffLines.Add(new DiffLineViewModel(line));
-        }
-        catch (OperationCanceledException)
-        {
-            // Superseded.
-        }
-        catch (GitException ex)
-        {
-            StatusMessage = ex.Message;
-        }
-        finally
-        {
-            IsDiffLoading = false;
-        }
-    }
 
     /// <summary>Selects the commit a sidebar ref points at, so clicking a branch jumps to its tip.</summary>
     public void SelectCommitBySha(string sha)

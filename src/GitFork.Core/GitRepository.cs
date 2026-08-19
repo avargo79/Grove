@@ -20,7 +20,11 @@ public sealed class GitRepository
     {
         RootPath = rootPath;
         _git = git;
+        WorkingCopy = new GitWorkingCopy(git);
     }
+
+    /// <summary>The write half of the API: staging, discarding and committing.</summary>
+    public GitWorkingCopy WorkingCopy { get; }
 
     public string RootPath { get; }
     public string Name => Path.GetFileName(RootPath.TrimEnd(Path.DirectorySeparatorChar, '/'));

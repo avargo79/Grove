@@ -84,6 +84,18 @@ public sealed class TestRepository : IDisposable
 
     public string Head() => Git("rev-parse", "HEAD").Trim();
 
+    /// <summary>Content of a path as currently staged in the index.</summary>
+    public string IndexContent(string relativePath) => Git("show", $":{relativePath}");
+
+    /// <summary>Content of a path in the working tree.</summary>
+    public string WorkingContent(string relativePath) =>
+        File.ReadAllText(System.IO.Path.Combine(Path, relativePath));
+
+    /// <summary>Content of a path as of HEAD.</summary>
+    public string HeadContent(string relativePath) => Git("show", $"HEAD:{relativePath}");
+
+    public int CommitCount() => int.Parse(Git("rev-list", "--count", "HEAD").Trim(), System.Globalization.CultureInfo.InvariantCulture);
+
     public void Dispose()
     {
         try

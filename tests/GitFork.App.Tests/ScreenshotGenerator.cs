@@ -26,7 +26,7 @@ public class ScreenshotGenerator
         var repositoryPath = Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_REPO")
                              ?? Directory.GetCurrentDirectory();
 
-        var viewModel = new MainViewModel();
+        var viewModel = new MainViewModel { WatchForChanges = false };
         var window = new MainWindow
         {
             DataContext = viewModel,
@@ -38,6 +38,11 @@ public class ScreenshotGenerator
         await viewModel.LoadRepositoryAsync(repositoryPath);
         await viewModel.PendingDetailLoad;
         await viewModel.PendingDiffLoad;
+
+        // GITFORK_SCREENSHOT_VIEW=working captures the staging pane instead of a commit.
+        if (Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_VIEW") == "working")
+            viewModel.SelectWorkingCopy();
+
         window.UpdateLayout();
 
         using var frame = window.CaptureRenderedFrame()

@@ -26,18 +26,28 @@ public sealed class GitCommandRunner(string workingDirectory, string gitPath = "
 {
     public string WorkingDirectory { get; } = workingDirectory;
 
-    public async Task<GitResult> RunAsync(IEnumerable<string> args, CancellationToken ct = default)
+    public Task<GitResult> RunAsync(IEnumerable<string> args, CancellationToken ct = default) =>
+        RunAsync(args, standardInput: null, ct);
+
+    /// <summary>
+    /// Runs git, optionally piping <paramref name="standardInput"/> to it. Patches are fed this way
+    /// rather than through a temporary file so nothing is left behind if the process is cancelled.
+    /// </summary>
+    public async Task<GitResult> RunAsync(
+        IEnumerable<string> args, string? standardInput, CancellationToken ct = default)
     {
         var psi = new ProcessStartInfo
         {
             FileName = gitPath,
             WorkingDirectory = WorkingDirectory,
+            RedirectStandardInput = standardInput is not null,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
+            StandardInputEncoding = standardInput is not null ? new UTF8Encoding(false) : null,
         };
 
         // Keep git non-interactive and locale-stable so output stays parseable.
@@ -52,6 +62,12 @@ public sealed class GitCommandRunner(string workingDirectory, string gitPath = "
         using var process = new Process { StartInfo = psi };
         if (!process.Start())
             throw new GitException($"Could not start '{gitPath}'.");
+
+        if (standardInput is not null)
+        {
+            await process.StandardInput.WriteAsync(standardInput.AsMemory(), ct).ConfigureAwait(false);
+            process.StandardInput.Close();
+        }
 
         var stdOutTask = process.StandardOutput.ReadToEndAsync(ct);
         var stdErrTask = process.StandardError.ReadToEndAsync(ct);

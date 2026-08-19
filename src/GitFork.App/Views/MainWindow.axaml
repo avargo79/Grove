@@ -109,10 +109,29 @@
             <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
 
             <!-- Commit graph over detail pane -->
-            <Grid Grid.Column="2" RowDefinitions="*,4,340">
+            <Grid Grid.Column="2" RowDefinitions="Auto,*,4,340">
+
+                <!-- Pinned working-copy row: always the first thing in the history column -->
+                <Border Grid.Row="0" Name="UncommittedRow"
+                        IsVisible="{Binding HasUncommittedChanges}"
+                        Background="{StaticResource RowBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                        Padding="0" Height="30"
+                        PointerPressed="OnUncommittedRowPressed">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Border Grid.Column="0" Width="12" Height="12" Margin="10,0,10,0"
+                                CornerRadius="6" VerticalAlignment="Center"
+                                BorderThickness="1.5" BorderBrush="{StaticResource ModifiedBrush}" />
+                        <TextBlock Grid.Column="1" Text="Uncommitted changes"
+                                   VerticalAlignment="Center" FontWeight="SemiBold" FontSize="12" />
+                        <TextBlock Grid.Column="2" Text="{Binding UncommittedSummary}"
+                                   VerticalAlignment="Center" Margin="0,0,12,0"
+                                   Foreground="{StaticResource MutedBrush}" FontSize="11.5" />
+                    </Grid>
+                </Border>
 
                 <!-- Commit list -->
-                <ListBox Grid.Row="0"
+                <ListBox Grid.Row="1"
                          Name="CommitList"
                          Classes="commits"
                          ItemsSource="{Binding Commits}"
@@ -176,121 +195,11 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <GridSplitter Grid.Row="1" Background="{StaticResource BorderBrush}"
+                <GridSplitter Grid.Row="2" Background="{StaticResource BorderBrush}"
                               HorizontalAlignment="Stretch" />
 
-                <!-- Detail pane: metadata + file list on the left, diff on the right -->
-                <Grid Grid.Row="2" ColumnDefinitions="320,4,*"
-                      Background="{StaticResource PanelBackgroundBrush}"
-                      IsVisible="{Binding Detail, Converter={x:Static ObjectConverters.IsNotNull}}">
-
-                    <!-- Rows rather than a DockPanel: a long commit message must scroll inside its
-                         own band instead of pushing the changed-file list off the bottom. -->
-                    <Grid Grid.Column="0" DataContext="{Binding Detail}" x:DataType="vm:CommitDetailViewModel"
-                          RowDefinitions="Auto,Auto,*">
-                        <!-- Commit metadata -->
-                        <Border Grid.Row="0" Padding="12,10" MaxHeight="220"
-                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                <SelectableTextBlock Text="{Binding Body}"
-                                                     IsVisible="{Binding HasBody}"
-                                                     TextWrapping="Wrap"
-                                                     Foreground="{StaticResource MutedBrush}"
-                                                     FontSize="12" Margin="0,2,0,2" />
-                                <TextBlock Text="{Binding AuthorLine}"
-                                           Foreground="{StaticResource MutedBrush}" FontSize="11.5" />
-                                <TextBlock Text="{Binding AuthoredOn}"
-                                           Foreground="{StaticResource DimBrush}" FontSize="11.5" />
-                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                    <SelectableTextBlock Text="{Binding Sha}"
-                                                         FontFamily="{StaticResource MonoFont}"
-                                                         Foreground="{StaticResource DimBrush}" FontSize="11" />
-                                </StackPanel>
-                            </StackPanel>
-                        </ScrollViewer>
-                        </Border>
-
-                        <!-- Changed files -->
-                        <Border Grid.Row="1" Padding="12,6">
-                            <TextBlock Text="{Binding FileCountDisplay}" Classes="sectionheader" />
-                        </Border>
-
-                        <ListBox Grid.Row="2" Name="FileList" Classes="flat"
-                                 ItemsSource="{Binding Files}"
-                                 SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
-                                 Background="Transparent" BorderThickness="0">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="vm:FileChangeViewModel">
-                                    <Grid ColumnDefinitions="16,*" ToolTip.Tip="{Binding ToolTip}">
-                                        <TextBlock Grid.Column="0" Text="{Binding StatusGlyph}"
-                                                   Classes="status"
-                                                   Classes.added="{Binding IsAdded}"
-                                                   Classes.deleted="{Binding IsDeleted}"
-                                                   Classes.renamed="{Binding IsRenamed}"
-                                                   Classes.conflict="{Binding IsConflict}"
-                                                   FontFamily="{StaticResource MonoFont}"
-                                                   FontSize="11.5" />
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                                            <TextBlock Text="{Binding FileName}"
-                                                       TextTrimming="CharacterEllipsis" FontSize="12" />
-                                            <TextBlock Text="{Binding Directory}"
-                                                       IsVisible="{Binding HasDirectory}"
-                                                       Foreground="{StaticResource DimBrush}"
-                                                       TextTrimming="CharacterEllipsis" FontSize="11" />
-                                        </StackPanel>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-
-                    <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
-
-                    <!-- Diff -->
-                    <Border Grid.Column="2" Background="{StaticResource RowBackgroundBrush}">
-                        <ListBox Classes="diff"
-                                 ItemsSource="{Binding DiffLines}"
-                                 Background="Transparent" BorderThickness="0"
-                                 SelectionMode="Single"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="vm:DiffLineViewModel">
-                                    <Border Classes="diffline"
-                                            Classes.added="{Binding IsAdded}"
-                                            Classes.removed="{Binding IsRemoved}"
-                                            Classes.hunk="{Binding IsHunkHeader}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding OldNumber}"
-                                                       FontFamily="{StaticResource MonoFont}"
-                                                       Foreground="{StaticResource DiffGutterBrush}"
-                                                       FontSize="11.5" Padding="4,0,0,0" />
-                                            <TextBlock Text="{Binding NewNumber}"
-                                                       FontFamily="{StaticResource MonoFont}"
-                                                       Foreground="{StaticResource DiffGutterBrush}"
-                                                       FontSize="11.5" Padding="6,0,8,0" />
-                                            <TextBlock Text="{Binding Marker}"
-                                                       FontFamily="{StaticResource MonoFont}"
-                                                       Classes="difftext"
-                                                       Classes.added="{Binding IsAdded}"
-                                                       Classes.removed="{Binding IsRemoved}"
-                                                       FontSize="11.5" />
-                                            <TextBlock Text="{Binding Text}"
-                                                       FontFamily="{StaticResource MonoFont}"
-                                                       Classes="difftext"
-                                                       Classes.added="{Binding IsAdded}"
-                                                       Classes.removed="{Binding IsRemoved}"
-                                                       Classes.hunk="{Binding IsHunkHeader}"
-                                                       Classes.header="{Binding IsHeader}"
-                                                       FontSize="11.5" />
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
-                </Grid>
+                <!-- Either the selected commit or the working copy, resolved by ViewLocator -->
+                <ContentControl Grid.Row="3" Content="{Binding DetailContent}" />
             </Grid>
         </Grid>
     </DockPanel>

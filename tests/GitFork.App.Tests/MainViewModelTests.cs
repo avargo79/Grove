@@ -29,9 +29,12 @@ public class MainViewModelTests
         return fixture;
     }
 
+    /// <summary>Watching is off in tests: a background refresh would race the assertions.</summary>
+    private static MainViewModel NewViewModel() => new() { WatchForChanges = false };
+
     private static async Task<MainViewModel> LoadAsync(TestRepository fixture)
     {
-        var vm = new MainViewModel();
+        var vm = NewViewModel();
         await vm.LoadRepositoryAsync(fixture.Path);
         await vm.PendingDetailLoad;
         await vm.PendingDiffLoad;
@@ -45,7 +48,7 @@ public class MainViewModelTests
         Directory.CreateDirectory(path);
         try
         {
-            var vm = new MainViewModel();
+            var vm = NewViewModel();
             await vm.LoadRepositoryAsync(path);
 
             Assert.False(vm.HasRepository);
@@ -207,8 +210,8 @@ public class MainViewModelTests
         var file = Assert.Single(vm.Detail!.Files);
         Assert.Equal("README.md", file.Change.Path);
         Assert.Same(file, vm.Detail.SelectedFile);
-        Assert.Contains(vm.DiffLines, l => l.IsAdded && l.Text == "changed");
-        Assert.Contains(vm.DiffLines, l => l.IsRemoved && l.Text == "world");
+        Assert.Contains(vm.Detail!.DiffLines, l => l.IsAdded && l.Text == "changed");
+        Assert.Contains(vm.Detail!.DiffLines, l => l.IsRemoved && l.Text == "world");
     }
 
     [Fact]
@@ -226,8 +229,8 @@ public class MainViewModelTests
         vm.Detail.SelectedFile = vm.Detail.Files.Single(f => f.Change.Path == "b.txt");
         await vm.PendingDiffLoad;
 
-        Assert.Contains(vm.DiffLines, l => l.IsAdded && l.Text == "two");
-        Assert.DoesNotContain(vm.DiffLines, l => l.Text == "ONE");
+        Assert.Contains(vm.Detail!.DiffLines, l => l.IsAdded && l.Text == "two");
+        Assert.DoesNotContain(vm.Detail!.DiffLines, l => l.Text == "ONE");
     }
 
     [Fact]
@@ -240,7 +243,6 @@ public class MainViewModelTests
         await vm.PendingDetailLoad;
 
         Assert.Null(vm.Detail);
-        Assert.Empty(vm.DiffLines);
     }
 
     [Fact]
@@ -306,7 +308,7 @@ public class MainViewModelTests
         using var fixture = TestRepository.CreateEmpty();
         fixture.Commit("first", "a.txt", "1");
 
-        var vm = new MainViewModel { PickFolderAsync = () => Task.FromResult<string?>(fixture.Path) };
+        var vm = new MainViewModel { WatchForChanges = false, PickFolderAsync = () => Task.FromResult<string?>(fixture.Path) };
         await vm.OpenRepositoryCommand.ExecuteAsync(null);
         await vm.PendingDetailLoad;
 
@@ -317,7 +319,7 @@ public class MainViewModelTests
     [Fact]
     public async Task CancellingThePickerLeavesNoRepositoryOpen()
     {
-        var vm = new MainViewModel { PickFolderAsync = () => Task.FromResult<string?>(null) };
+        var vm = new MainViewModel { WatchForChanges = false, PickFolderAsync = () => Task.FromResult<string?>(null) };
 
         await vm.OpenRepositoryCommand.ExecuteAsync(null);
 

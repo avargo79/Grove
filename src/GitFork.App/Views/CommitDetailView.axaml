@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:GitFork.App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="340"
+             x:Class="GitFork.App.Views.CommitDetailView"
+             x:DataType="vm:CommitDetailViewModel">
+
+    <Grid ColumnDefinitions="320,4,*" Background="{StaticResource PanelBackgroundBrush}">
+
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
+
+            <Border Grid.Row="0" Padding="12,10" MaxHeight="220"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <SelectableTextBlock Text="{Binding Body}"
+                                             IsVisible="{Binding HasBody}"
+                                             TextWrapping="Wrap"
+                                             Foreground="{StaticResource MutedBrush}"
+                                             FontSize="12" Margin="0,2" />
+                        <TextBlock Text="{Binding AuthorLine}"
+                                   Foreground="{StaticResource MutedBrush}" FontSize="11.5" />
+                        <TextBlock Text="{Binding AuthoredOn}"
+                                   Foreground="{StaticResource DimBrush}" FontSize="11.5" />
+                        <SelectableTextBlock Text="{Binding Sha}"
+                                             FontFamily="{StaticResource MonoFont}"
+                                             Foreground="{StaticResource DimBrush}" FontSize="11" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <Border Grid.Row="1" Padding="12,6">
+                <TextBlock Text="{Binding FileCountDisplay}" Classes="sectionheader" />
+            </Border>
+
+            <ListBox Grid.Row="2" Name="FileList" Classes="flat"
+                     ItemsSource="{Binding Files}"
+                     SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                     Background="Transparent" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:FileChangeViewModel">
+                        <Grid ColumnDefinitions="16,*" ToolTip.Tip="{Binding ToolTip}">
+                            <TextBlock Grid.Column="0" Text="{Binding StatusGlyph}"
+                                       Classes="status"
+                                       Classes.added="{Binding IsAdded}"
+                                       Classes.deleted="{Binding IsDeleted}"
+                                       Classes.renamed="{Binding IsRenamed}"
+                                       Classes.conflict="{Binding IsConflict}"
+                                       FontFamily="{StaticResource MonoFont}" FontSize="11.5" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontSize="12" />
+                                <TextBlock Text="{Binding Directory}"
+                                           IsVisible="{Binding HasDirectory}"
+                                           Foreground="{StaticResource DimBrush}"
+                                           TextTrimming="CharacterEllipsis" FontSize="11" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
+
+        <Border Grid.Column="2" Background="{StaticResource RowBackgroundBrush}">
+            <ListBox Classes="diff"
+                     ItemsSource="{Binding DiffLines}"
+                     Background="Transparent" BorderThickness="0"
+                     SelectionMode="Single"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:DiffLineViewModel">
+                        <Border Classes="diffline"
+                                Classes.added="{Binding IsAdded}"
+                                Classes.removed="{Binding IsRemoved}"
+                                Classes.hunk="{Binding IsHunkHeader}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding OldNumber}" FontFamily="{StaticResource MonoFont}"
+                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="4,0,0,0" />
+                                <TextBlock Text="{Binding NewNumber}" FontFamily="{StaticResource MonoFont}"
+                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="6,0,8,0" />
+                                <TextBlock Text="{Binding Marker}" FontFamily="{StaticResource MonoFont}"
+                                           Classes="difftext"
+                                           Classes.added="{Binding IsAdded}"
+                                           Classes.removed="{Binding IsRemoved}" FontSize="11.5" />
+                                <TextBlock Text="{Binding Text}" FontFamily="{StaticResource MonoFont}"
+                                           Classes="difftext"
+                                           Classes.added="{Binding IsAdded}"
+                                           Classes.removed="{Binding IsRemoved}"
+                                           Classes.hunk="{Binding IsHunkHeader}"
+                                           Classes.header="{Binding IsHeader}" FontSize="11.5" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</UserControl>

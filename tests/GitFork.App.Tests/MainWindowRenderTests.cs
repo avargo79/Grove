@@ -33,7 +33,7 @@ public class MainWindowRenderTests
 
     private static async Task<(Window Window, MainViewModel ViewModel)> ShowAsync(TestRepository fixture)
     {
-        var viewModel = new MainViewModel();
+        var viewModel = NewViewModel();
         var window = new MainWindow { DataContext = viewModel };
         window.Show();
 
@@ -46,6 +46,8 @@ public class MainWindowRenderTests
         return (window, viewModel);
     }
 
+    private static MainViewModel NewViewModel() => new() { WatchForChanges = false };
+
     private static IEnumerable<string> VisibleText(Visual root) =>
         root.GetVisualDescendants().OfType<TextBlock>()
             .Select(t => t.Text)
@@ -56,7 +58,7 @@ public class MainWindowRenderTests
     [AvaloniaFact]
     public void TheWindowOpensWithNoGraphRowsBeforeARepositoryIsLoaded()
     {
-        var window = new MainWindow { DataContext = new MainViewModel() };
+        var window = new MainWindow { DataContext = NewViewModel() };
         window.Show();
         window.UpdateLayout();
 

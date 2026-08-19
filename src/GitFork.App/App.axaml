@@ -136,6 +136,19 @@
             <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
         </Style>
 
+        <!-- Inline text actions: a button that reads as a link, not a chrome button. -->
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="4,1" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#33FFFFFF" />
+            <Setter Property="TextBlock.Foreground" Value="{StaticResource AccentBrush}" />
+        </Style>
+
         <Style Selector="TextBlock.sectionheader">
             <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
             <Setter Property="FontSize" Value="11" />

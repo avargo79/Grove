@@ -20,20 +20,22 @@ The visual core: open a repository and read its history.
 - [x] Unified diff with per-side line numbers and add/remove colouring (*Advanced Diff Viewer*)
 - [x] Unit and integration test suites, SonarAnalyzer on every build
 
-## M2 — Working copy and committing
+## M2 — Working copy and committing ✅
 
 The daily-driver loop.
 
-- [ ] "Uncommitted changes" pinned as the first row of the commit list, as Fork does
-- [ ] Staged / unstaged split view over the working tree
-- [ ] Stage and unstage whole files
-- [ ] Stage and unstage individual hunks (*Stage/unstage changes line-by-line*)
-- [ ] Line-level staging via a synthesised patch through `git apply --cached`
-- [ ] Discard changes, with confirmation
-- [ ] Commit box: message editor, amend toggle, recent-message recall
-- [ ] File-system watcher so external changes refresh the view automatically
+- [x] "Uncommitted changes" pinned as the first row of the commit list, as Fork does
+- [x] Staged / unstaged split view over the working tree
+- [x] Stage and unstage whole files, including deletions and untracked files
+- [x] Stage and unstage individual hunks (*Stage/unstage changes line-by-line*)
+- [x] Line-level staging via a synthesised patch through `git apply --cached`
+- [x] Discard changes, with confirmation
+- [x] Commit box: message editor, amend toggle, recent-message recall
+- [x] File-system watcher so external changes refresh the view automatically
 
 ## M3 — Branching and remote operations
+
+Next up.
 
 - [ ] Checkout, create, rename and delete branches from the sidebar
 - [ ] Fetch, pull and push with progress and cancellation
