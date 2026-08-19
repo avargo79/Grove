@@ -1,6 +1,6 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avalonia.Platform.Storage;
 using GitFork.App.ViewModels;
 
@@ -13,60 +13,84 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContextChanged += (_, _) => WireUp();
         WireUp();
+        KeyDown += OnKeyDown;
+    }
+
+    /// <summary>
+    /// The two shortcuts that open a window, which a KeyBinding cannot express because there is
+    /// no command on the view model to bind to.
+    /// </summary>
+    private void OnKeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
+    {
+        var modifier = OperatingSystem.IsMacOS()
+            ? Avalonia.Input.KeyModifiers.Meta
+            : Avalonia.Input.KeyModifiers.Control;
+
+        if (!e.KeyModifiers.HasFlag(modifier))
+            return;
+
+        switch (e.Key)
+        {
+            case Avalonia.Input.Key.K:
+                OpenPalette();
+                e.Handled = true;
+                break;
+
+            case Avalonia.Input.Key.R:
+                _ = OpenReflogAsync((DataContext as ShellViewModel)?.SelectedRepository);
+                e.Handled = true;
+                break;
+
+            case Avalonia.Input.Key.OemComma:
+                OpenSettings();
+                e.Handled = true;
+                break;
+
+            default:
+                break;
+        }
     }
 
     private void WireUp()
     {
-        if (DataContext is not MainViewModel vm)
+        if (DataContext is not ShellViewModel shell)
             return;
 
-        vm.PickFolderAsync = PickRepositoryFolderAsync;
-        vm.ConfirmAsync = ConfirmAsync;
-        vm.PromptAsync = PromptAsync;
+        shell.PickFolderAsync = PickRepositoryFolderAsync;
+        shell.ConfigureRepository = ConfigureRepository;
+        shell.ApplyTheme = App.ApplyTheme;
+
+        // Repositories opened before the window was wired still need their hooks.
+        foreach (var repository in shell.Repositories)
+            ConfigureRepository(repository);
     }
 
-    /// <summary>
-    /// Wires a freshly realised commit detail view to this window, so its file context menu can
-    /// open the blame and history windows.
-    /// </summary>
-    internal void AttachDetailView(CommitDetailView view)
+    /// <summary>Gives a repository the dialogs only a window can put on screen.</summary>
+    private void ConfigureRepository(MainViewModel repository)
     {
-        view.OpenBlameAsync = OpenBlameAsync;
-        view.OpenFileHistoryAsync = OpenFileHistoryAsync;
+        repository.PickFolderAsync = PickRepositoryFolderAsync;
+        repository.ConfirmAsync = ConfirmAsync;
+        repository.PromptAsync = PromptAsync;
     }
 
-    private async Task OpenBlameAsync(ViewModels.FileChangeViewModel file, string? revision)
+    /// <summary>Native folder picker; returns the chosen path or null if the user cancelled.</summary>
+    private async Task<string?> PickRepositoryFolderAsync()
     {
-        if (DataContext is not MainViewModel { Repository: { } repository })
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Open Repository",
+            AllowMultiple = false,
+        });
+
+        return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+    }
+
+    internal async Task OpenReflogAsync(MainViewModel? main)
+    {
+        if (main?.Repository is not { } repository)
             return;
 
-        var viewModel = new ViewModels.BlameViewModel(repository);
-        var window = new BlameWindow { DataContext = viewModel };
-        window.Show(this);
-
-        await viewModel.LoadAsync(file.Change.Path, revision);
-    }
-
-    private async Task OpenFileHistoryAsync(ViewModels.FileChangeViewModel file)
-    {
-        if (DataContext is not MainViewModel { Repository: { } repository })
-            return;
-
-        var viewModel = new ViewModels.FileHistoryViewModel(repository);
-        var window = new FileHistoryWindow { DataContext = viewModel };
-        window.Show(this);
-
-        await viewModel.LoadAsync(file.Change.Path);
-    }
-
-    private void OnReflogClicked(object? sender, RoutedEventArgs e) => _ = OpenReflogAsync();
-
-    private async Task OpenReflogAsync()
-    {
-        if (DataContext is not MainViewModel { Repository: { } repository } main)
-            return;
-
-        var viewModel = new ViewModels.ReflogViewModel(repository)
+        var viewModel = new ReflogViewModel(repository)
         {
             ConfirmAsync = ConfirmAsync,
             PromptAsync = PromptAsync,
@@ -78,29 +102,12 @@ public partial class MainWindow : Window
         await viewModel.LoadAsync();
     }
 
-    /// <summary>Rebase onto the ref that was right-clicked in the sidebar.</summary>
-    private void OnInteractiveRebaseFromRefClicked(object? sender, RoutedEventArgs e)
+    internal async Task OpenRebaseEditorAsync(MainViewModel? main, string upstream)
     {
-        if (sender is MenuItem { DataContext: ViewModels.SidebarItemViewModel item })
-            _ = OpenRebaseEditorAsync(item.Ref.ShortName);
-    }
-
-    /// <summary>
-    /// Rebase the commits above the one that was right-clicked, which is what "from here" means:
-    /// that commit becomes the upstream everything after it is replayed onto.
-    /// </summary>
-    private void OnInteractiveRebaseFromCommitClicked(object? sender, RoutedEventArgs e)
-    {
-        if (sender is MenuItem { DataContext: ViewModels.CommitRowViewModel row })
-            _ = OpenRebaseEditorAsync(row.Sha);
-    }
-
-    private async Task OpenRebaseEditorAsync(string upstream)
-    {
-        if (DataContext is not MainViewModel { Repository: { } repository } main)
+        if (main?.Repository is not { } repository)
             return;
 
-        var viewModel = new ViewModels.RebaseEditorViewModel(repository) { ConfirmAsync = ConfirmAsync };
+        var viewModel = new RebaseEditorViewModel(repository) { ConfirmAsync = ConfirmAsync };
         viewModel.RepositoryChanged += (_, _) => _ = main.RefreshCommand.ExecuteAsync(null);
 
         var window = new RebaseEditorWindow { DataContext = viewModel };
@@ -108,11 +115,71 @@ public partial class MainWindow : Window
         await viewModel.LoadAsync(upstream);
     }
 
-    /// <summary>Selecting the pinned row hands the lower pane to the working copy.</summary>
-    private void OnUncommittedRowPressed(object? sender, PointerPressedEventArgs e)
+    internal async Task OpenBlameAsync(MainViewModel? main, FileChangeViewModel file, string? revision)
     {
-        if (DataContext is MainViewModel vm)
-            vm.SelectWorkingCopy();
+        if (main?.Repository is not { } repository)
+            return;
+
+        var viewModel = new BlameViewModel(repository);
+        var window = new BlameWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync(file.Change.Path, revision);
+    }
+
+    internal async Task OpenFileHistoryAsync(MainViewModel? main, FileChangeViewModel file)
+    {
+        if (main?.Repository is not { } repository)
+            return;
+
+        var viewModel = new FileHistoryViewModel(repository);
+        var window = new FileHistoryWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync(file.Change.Path);
+    }
+
+    /// <summary>
+    /// Wires a freshly realised commit detail view to this window, so its file context menu can
+    /// open the blame and history windows.
+    /// </summary>
+    internal void AttachDetailView(CommitDetailView view)
+    {
+        var main = view.FindAncestorOfType<RepositoryView>()?.DataContext as MainViewModel;
+        view.OpenBlameAsync = (file, revision) => OpenBlameAsync(main, file, revision);
+        view.OpenFileHistoryAsync = file => OpenFileHistoryAsync(main, file);
+    }
+
+    private void OnSettingsClicked(object? sender, RoutedEventArgs e) => _ = OpenSettingsAsync();
+
+    private void OnCommandPaletteClicked(object? sender, RoutedEventArgs e) => OpenPalette();
+
+    /// <summary>Opens settings without awaiting, for callers that cannot.</summary>
+    internal void OpenSettings() => _ = OpenSettingsAsync();
+
+    private async Task OpenSettingsAsync()
+    {
+        if (DataContext is not ShellViewModel shell)
+            return;
+
+        var viewModel = new SettingsViewModel(shell.Settings);
+        var window = new SettingsWindow { DataContext = viewModel };
+
+        await window.ShowDialog(this);
+
+        if (viewModel.Accepted)
+            shell.ApplySettings(viewModel.ToSettings());
+    }
+
+    /// <summary>The command palette: every action, searchable, so nothing is mouse-only.</summary>
+    internal void OpenPalette()
+    {
+        if (DataContext is not ShellViewModel shell)
+            return;
+
+        var viewModel = new CommandPaletteViewModel(CommandCatalog.Build(shell, this));
+        var window = new CommandPaletteWindow { DataContext = viewModel };
+        window.Show(this);
     }
 
     /// <summary>Modal single-line text prompt. Returns null when the user cancels.</summary>
@@ -198,32 +265,5 @@ public partial class MainWindow : Window
 
         await dialog.ShowDialog(this);
         return confirmed;
-    }
-
-    /// <summary>Native folder picker; returns the chosen path or null if the user cancelled.</summary>
-    private async Task<string?> PickRepositoryFolderAsync()
-    {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = "Open Repository",
-            AllowMultiple = false,
-        });
-
-        return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
-    }
-
-    /// <summary>Clicking a branch, tag or stash jumps the commit list to the ref's tip.</summary>
-    private void OnSidebarSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (DataContext is not MainViewModel vm)
-            return;
-        if (sender is not ListBox { SelectedItem: SidebarItemViewModel item })
-            return;
-
-        vm.SelectCommitBySha(item.TargetSha);
-
-        var list = this.FindControl<ListBox>("CommitList");
-        if (list is not null && vm.SelectedCommit is { } selected)
-            list.ScrollIntoView(selected);
     }
 }

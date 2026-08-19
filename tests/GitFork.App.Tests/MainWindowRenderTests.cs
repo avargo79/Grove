@@ -33,20 +33,10 @@ public class MainWindowRenderTests
 
     private static async Task<(Window Window, MainViewModel ViewModel)> ShowAsync(TestRepository fixture)
     {
-        var viewModel = NewViewModel();
-        var window = new MainWindow { DataContext = viewModel };
-        window.Show();
-
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
-        await viewModel.PendingDiffLoad;
-
-        // Item containers are realised during layout, so force a pass before inspecting the tree.
-        window.UpdateLayout();
+        var (window, _, viewModel) = await TestShell.OpenAsync(fixture.Path);
         return (window, viewModel);
     }
 
-    private static MainViewModel NewViewModel() => new() { WatchForChanges = false };
 
     private static IEnumerable<string> VisibleText(Visual root) =>
         root.GetVisualDescendants().OfType<TextBlock>()
@@ -58,9 +48,7 @@ public class MainWindowRenderTests
     [AvaloniaFact]
     public void TheWindowOpensWithNoGraphRowsBeforeARepositoryIsLoaded()
     {
-        var window = new MainWindow { DataContext = NewViewModel() };
-        window.Show();
-        window.UpdateLayout();
+        var (window, _) = TestShell.Empty();
 
         Assert.Empty(window.GetVisualDescendants().OfType<GraphRowControl>());
         Assert.Contains("Open a repository to get started.", VisibleText(window));

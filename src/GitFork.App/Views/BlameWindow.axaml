@@ -7,22 +7,22 @@
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
         x:Class="GitFork.App.Views.BlameWindow"
         x:DataType="vm:BlameViewModel"
-        Background="{StaticResource WindowBackgroundBrush}"
-        Foreground="{StaticResource ForegroundBrush}"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
         Width="1000" Height="700"
         Title="{Binding Title}">
 
     <DockPanel>
         <Border DockPanel.Dock="Bottom" Padding="10,4"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
             <TextBlock Name="BlameStatus" Text="{Binding StatusText}"
-                       Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                       Foreground="{DynamicResource MutedBrush}" FontSize="11" />
         </Border>
 
         <ListBox Name="BlameList" Classes="diff"
                  ItemsSource="{Binding Lines}"
-                 Background="{StaticResource RowBackgroundBrush}" BorderThickness="0"
+                 Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0"
                  SelectionMode="Single"
                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <ListBox.ItemTemplate>
@@ -30,15 +30,15 @@
                     <StackPanel Orientation="Horizontal" ToolTip.Tip="{Binding ToolTip}">
                         <TextBlock Text="{Binding Sha}" Width="66"
                                    FontFamily="{StaticResource MonoFont}" FontSize="11"
-                                   Foreground="{StaticResource AccentBrush}" Padding="4,0,0,0" />
+                                   Foreground="{DynamicResource AccentBrush}" Padding="4,0,0,0" />
                         <TextBlock Text="{Binding Author}" Width="120"
-                                   FontSize="11" Foreground="{StaticResource MutedBrush}"
+                                   FontSize="11" Foreground="{DynamicResource MutedBrush}"
                                    TextTrimming="CharacterEllipsis" />
                         <TextBlock Text="{Binding Date}" Width="90"
-                                   FontSize="11" Foreground="{StaticResource DimBrush}" />
+                                   FontSize="11" Foreground="{DynamicResource DimBrush}" />
                         <TextBlock Text="{Binding Number}"
                                    FontFamily="{StaticResource MonoFont}" FontSize="11.5"
-                                   Foreground="{StaticResource DiffGutterBrush}" Padding="0,0,10,0" />
+                                   Foreground="{DynamicResource DiffGutterBrush}" Padding="0,0,10,0" />
                         <controls:DiffTextBlock Runs="{Binding Runs}"
                                                 FontFamily="{StaticResource MonoFont}" FontSize="11.5" />
                     </StackPanel>

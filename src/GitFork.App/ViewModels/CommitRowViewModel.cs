@@ -21,8 +21,32 @@ public sealed class CommitRowViewModel(
     Commit commit,
     GraphRow graphRow,
     double graphWidth,
-    IReadOnlyDictionary<string, RefKind>? refKinds = null)
+    IReadOnlyDictionary<string, RefKind>? refKinds = null,
+    SignatureStatus signature = SignatureStatus.None)
 {
+    public SignatureStatus Signature { get; } = signature;
+
+    public bool IsSigned => Signature != SignatureStatus.None;
+    public bool HasGoodSignature => Signature == SignatureStatus.Good;
+    public bool HasBadSignature => Signature is SignatureStatus.Bad or SignatureStatus.Unknown;
+
+    /// <summary>A seal for a verified signature, a warning triangle for anything doubtful.</summary>
+    public string SignatureGlyph => Signature switch
+    {
+        SignatureStatus.Good => "\u2713",
+        SignatureStatus.Untrusted => "\u2713",
+        _ => "\u26A0",
+    };
+
+    public string SignatureTooltip => Signature switch
+    {
+        SignatureStatus.Good => "Signed, and the signature verifies",
+        SignatureStatus.Untrusted => "Signed and valid, but the key is not trusted",
+        SignatureStatus.Bad => "Signed, but the signature does not verify",
+        SignatureStatus.Unknown => "Signed by a key this machine does not have",
+        _ => string.Empty,
+    };
+
     public Commit Commit { get; } = commit;
     public GraphRow GraphRow { get; } = graphRow;
 

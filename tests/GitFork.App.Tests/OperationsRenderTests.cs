@@ -14,13 +14,7 @@ public class OperationsRenderTests
 {
     private static async Task<(Window Window, MainViewModel ViewModel)> ShowAsync(TestRepository fixture)
     {
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow { DataContext = viewModel };
-        window.Show();
-
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
-        window.UpdateLayout();
+        var (window, _, viewModel) = await TestShell.OpenAsync(fixture.Path);
         return (window, viewModel);
     }
 
@@ -51,14 +45,14 @@ public class OperationsRenderTests
     }
 
     [AvaloniaFact]
-    public void TheNetworkToolbarIsHiddenWithNoRepositoryOpen()
+    public void ThereIsNoRepositoryUiUntilOneIsOpen()
     {
-        var window = new MainWindow { DataContext = new MainViewModel { WatchForChanges = false } };
-        window.Show();
-        window.UpdateLayout();
+        var (window, _) = TestShell.Empty();
 
-        // The button itself is not hidden; its containing panel is.
-        Assert.False(Find<Button>(window, "FetchButton").IsEffectivelyVisible);
+        // The shell only builds a repository view once there is a repository to build it for.
+        Assert.Empty(window.GetVisualDescendants().OfType<RepositoryView>());
+        Assert.DoesNotContain(window.GetVisualDescendants().OfType<Button>(), b => b.Name == "FetchButton");
+        Assert.True(Find<StackPanel>(window, "EmptyState").IsVisible);
     }
 
     [AvaloniaFact]

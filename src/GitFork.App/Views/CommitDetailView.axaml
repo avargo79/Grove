@@ -9,27 +9,27 @@
              x:DataType="vm:CommitDetailViewModel"
              AttachedToVisualTree="OnAttachedToTree">
 
-    <Grid ColumnDefinitions="320,4,*" Background="{StaticResource PanelBackgroundBrush}">
+    <Grid ColumnDefinitions="320,4,*" Background="{DynamicResource PanelBackgroundBrush}">
 
         <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
 
             <Border Grid.Row="0" Padding="12,10" MaxHeight="220"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="4">
                         <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
                         <SelectableTextBlock Text="{Binding Body}"
                                              IsVisible="{Binding HasBody}"
                                              TextWrapping="Wrap"
-                                             Foreground="{StaticResource MutedBrush}"
+                                             Foreground="{DynamicResource MutedBrush}"
                                              FontSize="12" Margin="0,2" />
                         <TextBlock Text="{Binding AuthorLine}"
-                                   Foreground="{StaticResource MutedBrush}" FontSize="11.5" />
+                                   Foreground="{DynamicResource MutedBrush}" FontSize="11.5" />
                         <TextBlock Text="{Binding AuthoredOn}"
-                                   Foreground="{StaticResource DimBrush}" FontSize="11.5" />
+                                   Foreground="{DynamicResource DimBrush}" FontSize="11.5" />
                         <SelectableTextBlock Text="{Binding Sha}"
                                              FontFamily="{StaticResource MonoFont}"
-                                             Foreground="{StaticResource DimBrush}" FontSize="11" />
+                                             Foreground="{DynamicResource DimBrush}" FontSize="11" />
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -64,7 +64,7 @@
                                 <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontSize="12" />
                                 <TextBlock Text="{Binding Directory}"
                                            IsVisible="{Binding HasDirectory}"
-                                           Foreground="{StaticResource DimBrush}"
+                                           Foreground="{DynamicResource DimBrush}"
                                            TextTrimming="CharacterEllipsis" FontSize="11" />
                             </StackPanel>
                         </Grid>
@@ -73,7 +73,7 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
+        <GridSplitter Grid.Column="1" Background="{DynamicResource BorderBrush}" />
 
         <views:DiffView Grid.Column="2" DataContext="{Binding Diff}" />
 

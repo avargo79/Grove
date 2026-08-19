@@ -12,6 +12,10 @@ The staging pane, with hunk- and line-level staging:
 
 ![The working copy pane with staged and unstaged files, a diff and the commit box](docs/screenshot-staging.png)
 
+The light theme:
+
+![The same repository in the light theme](docs/screenshot-light.png)
+
 Side-by-side, with word-level and syntax colouring:
 
 ![A side-by-side diff with syntax colouring and word-level highlights](docs/screenshot-sidebyside.png)
@@ -22,8 +26,8 @@ A conflicted merge, with the way out offered up front:
 
 ## Current state
 
-Milestones 1 to 5 are complete: browsing history, the full staging and commit loop, branching,
-merging and remote operations, the deeper diff and history views, and the advanced workflows.
+All six milestones are complete. See [docs/ROADMAP.md](docs/ROADMAP.md) for what was built and
+what was deliberately left out.
 
 **Browsing**
 
@@ -63,7 +67,12 @@ merging and remote operations, the deeper diff and history views, and the advanc
 - Reflog browser that flags commits no branch can reach, and recovers them onto a branch
 - Submodule listing and update
 
-Multi-repository tabs, search and a light theme are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Getting around**
+
+- Several repositories open at once as tabs, with a recent list
+- Search history by message, author or path; load more rather than truncating at a fixed cap
+- Light and dark themes
+- Keyboard shortcuts, and a command palette (⌘K / Ctrl+K) listing every action with its binding
 
 ## Running it
 
@@ -74,6 +83,19 @@ dotnet run --project src/GitFork.App
 ```
 
 Then use **Open Repository…** and pick any folder inside a git work tree.
+
+## Building a release
+
+```bash
+./scripts/publish.sh            # for this machine
+./scripts/publish.sh win-x64    # or any runtime identifier
+./scripts/publish-all.sh        # every supported platform
+```
+
+Builds are self-contained, so the result runs without a .NET runtime installed — which is the
+point, given the licensing constraint this project exists for. Windows and Linux get a single
+executable; macOS gets a `.app` bundle, because recent macOS kills a bare adhoc-signed executable
+on launch without explanation.
 
 ## Tests
 

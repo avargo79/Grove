@@ -6,27 +6,27 @@
         mc:Ignorable="d" d:DesignWidth="820" d:DesignHeight="560"
         x:Class="GitFork.App.Views.RebaseEditorWindow"
         x:DataType="vm:RebaseEditorViewModel"
-        Background="{StaticResource WindowBackgroundBrush}"
-        Foreground="{StaticResource ForegroundBrush}"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
         Width="820" Height="560"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}">
 
     <DockPanel>
         <Border DockPanel.Dock="Top" Padding="12,8"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
             <StackPanel Spacing="4">
                 <TextBlock Text="{Binding Summary}"
-                           Foreground="{StaticResource ForegroundBrush}" FontWeight="SemiBold" />
+                           Foreground="{DynamicResource ForegroundBrush}" FontWeight="SemiBold" />
                 <TextBlock Text="Oldest first, the order git replays them in. Nothing changes until you start."
-                           Foreground="{StaticResource MutedBrush}" FontSize="11.5" />
+                           Foreground="{DynamicResource MutedBrush}" FontSize="11.5" />
             </StackPanel>
         </Border>
 
         <Border DockPanel.Dock="Bottom" Padding="12,8"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
             <Grid ColumnDefinitions="Auto,Auto,*,Auto">
                 <Button Grid.Column="0" Name="MoveUpButton" Content="Move Up"
                         Command="{Binding MoveUpCommand}" />
@@ -45,7 +45,7 @@
         <ListBox Name="RebaseList" Classes="flat"
                  ItemsSource="{Binding Rows}"
                  SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
-                 Background="{StaticResource RowBackgroundBrush}" BorderThickness="0">
+                 Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="vm:RebaseRowViewModel">
                     <Grid ColumnDefinitions="130,70,*" Height="26">
@@ -54,7 +54,7 @@
                                   SelectedItem="{Binding Action, Mode=TwoWay}" />
                         <TextBlock Grid.Column="1" Text="{Binding ShortSha}"
                                    FontFamily="{StaticResource MonoFont}" FontSize="11.5"
-                                   Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="2" Text="{Binding Subject}"
                                    VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                    Classes="rebasesubject"

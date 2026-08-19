@@ -7,51 +7,51 @@
         mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
         x:Class="GitFork.App.Views.FileHistoryWindow"
         x:DataType="vm:FileHistoryViewModel"
-        Background="{StaticResource WindowBackgroundBrush}"
-        Foreground="{StaticResource ForegroundBrush}"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
         Width="1100" Height="700"
         Title="{Binding Title}">
 
     <DockPanel>
         <Border DockPanel.Dock="Top" Padding="10,6"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
             <CheckBox Name="FollowRenamesToggle" Content="Follow renames" FontSize="11.5"
                       IsChecked="{Binding FollowRenames, Mode=TwoWay}" />
         </Border>
 
         <Border DockPanel.Dock="Bottom" Padding="10,4"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
             <TextBlock Name="HistoryStatus" Text="{Binding StatusText}"
-                       Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                       Foreground="{DynamicResource MutedBrush}" FontSize="11" />
         </Border>
 
         <Grid RowDefinitions="200,4,*">
             <ListBox Grid.Row="0" Name="HistoryList" Classes="commits"
                      ItemsSource="{Binding Entries}"
                      SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
-                     Background="{StaticResource RowBackgroundBrush}" BorderThickness="0">
+                     Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="vm:FileHistoryEntryViewModel">
                         <Grid ColumnDefinitions="*,150,110,70" VerticalAlignment="Center">
                             <TextBlock Grid.Column="0" Text="{Binding Subject}" Margin="8,0,0,0"
                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{Binding AuthorName}" FontSize="12"
-                                       Foreground="{StaticResource MutedBrush}"
+                                       Foreground="{DynamicResource MutedBrush}"
                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="{Binding DateDisplay}" FontSize="12"
                                        ToolTip.Tip="{Binding DateTooltip}"
-                                       Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                                       Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="3" Text="{Binding ShortSha}" FontSize="11.5"
                                        FontFamily="{StaticResource MonoFont}"
-                                       Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
+                                       Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <GridSplitter Grid.Row="1" Background="{StaticResource BorderBrush}"
+            <GridSplitter Grid.Row="1" Background="{DynamicResource BorderBrush}"
                           HorizontalAlignment="Stretch" />
 
             <views:DiffView Grid.Row="2" DataContext="{Binding Diff}" />

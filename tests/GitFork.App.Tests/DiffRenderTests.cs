@@ -28,14 +28,7 @@ public class DiffRenderTests
 
     private static async Task<(Window Window, MainViewModel ViewModel)> ShowAsync(TestRepository fixture)
     {
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow { DataContext = viewModel };
-        window.Show();
-
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
-        await viewModel.PendingDiffLoad;
-        window.UpdateLayout();
+        var (window, _, viewModel) = await TestShell.OpenAsync(fixture.Path);
         return (window, viewModel);
     }
 

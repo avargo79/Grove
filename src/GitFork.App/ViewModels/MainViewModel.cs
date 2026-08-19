@@ -10,7 +10,9 @@ namespace GitFork.App.ViewModels;
 
 public sealed partial class MainViewModel : ViewModelBase, IDisposable
 {
-    private const int CommitPageSize = 2000;
+    private AppSettings _settings = AppSettings.Default;
+    private IReadOnlyDictionary<string, SignatureStatus> _signatures =
+        new Dictionary<string, SignatureStatus>(StringComparer.Ordinal);
 
     private GitRepository? _repository;
     private CancellationTokenSource? _detailCts;
@@ -81,6 +83,102 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     /// <summary>The open repository, for views that need to start their own queries.</summary>
     public GitRepository? Repository => _repository;
+
+    /// <summary>What the history is narrowed to; empty means everything.</summary>
+    [ObservableProperty]
+    public partial CommitFilter Filter { get; set; } = CommitFilter.Empty;
+
+    // The filter boxes bind to plain strings; they are gathered into a CommitFilter on search.
+    [ObservableProperty]
+    public partial string FilterText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string FilterAuthor { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string FilterPath { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasMoreCommits { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoadingMore { get; set; }
+
+    public bool IsFiltered => !Filter.IsEmpty;
+
+    public string FilterDescription => Filter.Describe();
+
+    /// <summary>Applies settings that affect this repository's views.</summary>
+    public void ApplySettings(AppSettings settings)
+    {
+        _settings = settings;
+
+        if (Detail is { } detail)
+        {
+            detail.Diff.ContextLines = settings.DiffContextLines;
+            detail.Diff.Whitespace = settings.DiffWhitespace;
+            detail.Diff.ShowSyntaxHighlighting = settings.ShowSyntaxHighlighting;
+            detail.Diff.ShowWordHighlighting = settings.ShowWordHighlighting;
+        }
+    }
+
+    /// <summary>Re-reads history with the current filter.</summary>
+    [RelayCommand]
+    private async Task ApplyFilterAsync()
+    {
+        Filter = new CommitFilter
+        {
+            Text = FilterText,
+            Author = FilterAuthor,
+            Path = FilterPath,
+        };
+
+        OnPropertyChanged(nameof(IsFiltered));
+        OnPropertyChanged(nameof(FilterDescription));
+
+        if (_repository is not null)
+            await LoadAsync(_repository).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private async Task ClearFilterAsync()
+    {
+        FilterText = string.Empty;
+        FilterAuthor = string.Empty;
+        FilterPath = string.Empty;
+        await ApplyFilterAsync().ConfigureAwait(true);
+    }
+
+    /// <summary>Appends the next page of history rather than reloading what is already shown.</summary>
+    [RelayCommand]
+    private async Task LoadMoreCommitsAsync()
+    {
+        if (_repository is null || !HasMoreCommits || IsLoadingMore)
+            return;
+
+        IsLoadingMore = true;
+        try
+        {
+            var page = await _repository
+                .GetCommitPageAsync(_settings.CommitPageSize, skip: Commits.Count, filter: Filter)
+                .ConfigureAwait(true);
+
+            // The graph is laid out over the whole list, so it has to be rebuilt from all of it.
+            var all = Commits.Select(c => c.Commit).Concat(page.Commits).ToList();
+            var refs = await _repository.GetRefsAsync().ConfigureAwait(true);
+
+            PopulateCommits(all, refs);
+            HasMoreCommits = page.HasMore;
+        }
+        catch (GitException ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoadingMore = false;
+        }
+    }
 
     /// <summary>The in-flight detail load, exposed so tests can await selection side effects.</summary>
     internal Task PendingDetailLoad { get; private set; } = Task.CompletedTask;
@@ -157,17 +255,21 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
         IsBusy = true;
         try
         {
-            var commitsTask = repository.GetCommitsAsync(CommitPageSize);
+            var commitsTask = repository.GetCommitPageAsync(_settings.CommitPageSize, skip: 0, filter: Filter);
             var refsTask = repository.GetRefsAsync();
             var branchTask = repository.GetCurrentBranchAsync();
             var statusTask = repository.GetStatusAsync();
             var stashesTask = repository.Stashes.GetStashesAsync();
+            var signaturesTask = repository.Integrations.GetSignatureStatusAsync();
 
-            var commits = await commitsTask.ConfigureAwait(true);
+            var page = await commitsTask.ConfigureAwait(true);
+            var commits = page.Commits;
+            HasMoreCommits = page.HasMore;
             var refs = await refsTask.ConfigureAwait(true);
             CurrentBranch = await branchTask.ConfigureAwait(true) ?? "detached HEAD";
             var status = await statusTask.ConfigureAwait(true);
             var stashes = await stashesTask.ConfigureAwait(true);
+            _signatures = await signaturesTask.ConfigureAwait(true);
 
             PopulateCommits(commits, refs);
             PopulateSidebar(refs, stashes);
@@ -217,7 +319,9 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
         Commits.Clear();
         for (var i = 0; i < commits.Count; i++)
-            Commits.Add(new CommitRowViewModel(commits[i], rows[i], graphWidth, refKinds));
+            Commits.Add(new CommitRowViewModel(
+                commits[i], rows[i], graphWidth, refKinds,
+                _signatures.GetValueOrDefault(commits[i].Sha, SignatureStatus.None)));
 
         // Keep the user on the same commit across a refresh rather than jumping to the top.
         SelectedCommit = Commits.FirstOrDefault(c => c.Sha == previouslySelected) ?? Commits.FirstOrDefault();

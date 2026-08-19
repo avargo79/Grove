@@ -76,7 +76,27 @@ public sealed class GitRepository
     public async Task<IReadOnlyList<Commit>> GetCommitsAsync(
         int maxCount = 2000, bool allRefs = true, CancellationToken ct = default)
     {
-        var args = new List<string> { "log", "--topo-order", $"--pretty=format:{LogFormat}", $"--max-count={maxCount}" };
+        var page = await GetCommitPageAsync(maxCount, allRefs, 0, null, ct).ConfigureAwait(false);
+        return page.Commits;
+    }
+
+    /// <summary>
+    /// One page of history, optionally filtered. <paramref name="skip"/> makes paging possible, so
+    /// a long history loads on demand rather than being silently truncated.
+    /// </summary>
+    public async Task<CommitPage> GetCommitPageAsync(
+        int maxCount = 2000, bool allRefs = true, int skip = 0, CommitFilter? filter = null,
+        CancellationToken ct = default)
+    {
+        var effectiveFilter = filter ?? CommitFilter.Empty;
+
+        var args = new List<string> { "log", "--topo-order", $"--pretty=format:{LogFormat}" };
+
+        // One extra, purely to find out whether there is another page behind this one.
+        args.Add($"--max-count={maxCount + 1}");
+        if (skip > 0)
+            args.Add($"--skip={skip}");
+
         if (allRefs)
         {
             // Deliberately not "--all": that pulls in refs/stash, which would show the stash's
@@ -85,6 +105,14 @@ public sealed class GitRepository
             args.Add("--tags");
             args.Add("--remotes");
             args.Add("HEAD");
+        }
+
+        args.AddRange(effectiveFilter.ToArguments());
+
+        if (!string.IsNullOrWhiteSpace(effectiveFilter.Path))
+        {
+            args.Add("--");
+            args.Add(effectiveFilter.Path);
         }
 
         var result = await _git.RunAsync(args, ct).ConfigureAwait(false);
@@ -101,7 +129,8 @@ public sealed class GitRepository
             ];
             if (emptyRepositorySignals.Any(signal =>
                     result.StdErr.Contains(signal, StringComparison.OrdinalIgnoreCase)))
-                return [];
+                return CommitPage.Empty;
+
             result.EnsureSuccess("git log");
         }
 
@@ -126,7 +155,12 @@ public sealed class GitRepository
                 RefNames: ParseDecoration(f[7])));
         }
 
-        return commits;
+        // Drop the probe commit; its only job was to answer "is there more?".
+        var hasMore = commits.Count > maxCount;
+        if (hasMore)
+            commits.RemoveAt(commits.Count - 1);
+
+        return new CommitPage(commits, hasMore, skip);
     }
 
     public async Task<CommitDetail> GetCommitDetailAsync(Commit commit, CancellationToken ct = default)

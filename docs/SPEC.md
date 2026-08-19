@@ -195,7 +195,29 @@ Two things this depends on, both of which caught the implementation out first:
 `reword` is written to the plan as `edit` for the same reason editors are suppressed everywhere
 else — git's reword opens one, and silently keeping the old message would be worse than stopping.
 
-### 3.8 Threading
+### 3.8 The shell
+
+`MainWindow` is a tab host over `ShellViewModel`; one `MainViewModel` per open repository, with the
+whole repository UI extracted into `RepositoryView`. The window keeps only what needs a window:
+the folder picker, the confirm and prompt dialogs, and the blame, history, rebase, reflog, settings
+and palette windows. Opening a repository that is already open selects its tab rather than adding
+a second view of the same thing.
+
+Settings persist as JSON under the user's application data. Every failure path — missing file,
+corrupt JSON, unreadable directory — returns defaults, because settings going bad must never stop
+the app from starting.
+
+The palette and the keyboard shortcuts are built from one `CommandCatalog`, so a binding and its
+palette entry cannot disagree about what a key does.
+
+### 3.9 Theming
+
+Both palettes live in `ThemeDictionaries` under identical keys, and every theme brush is resolved
+with `DynamicResource`. That is what allows the switch at runtime: a `StaticResource` would bind
+the dark value permanently. The syntax colours in `DiffTextBlock` are the one place this is easy to
+get wrong, since they are code rather than XAML.
+
+### 3.10 Threading
 
 All git calls are async over `Process`. Selection changes cancel the in-flight detail/diff load
 through a `CancellationTokenSource`, so holding an arrow key down does not queue up work.
@@ -218,6 +240,7 @@ through a `CancellationTokenSource`, so holding an arrow key down does not queue
 | `RebaseTodoItem` | `git log --reverse --no-merges` |
 | `SignatureStatus` | `git log --format=%H %G?` |
 | `Submodule` | `git submodule status --recursive` |
+| `CommitPage` | `git log --max-count --skip` plus a `CommitFilter` |
 | `FileDiff` / `DiffHunk` | `git diff [--cached] -M` → `DiffParser.ParseFiles` |
 
 The stash list comes from `git stash list` rather than `git for-each-ref`, because the latter only
@@ -252,12 +275,12 @@ SonarQube or SonarCloud instance when one is configured.
 
 ## 6. Known limitations
 
-- History is capped at 2000 commits per load; incremental paging is not implemented yet.
-- The graph is built over the commits actually returned, so parents beyond the cap render as
-  dangling lane ends.
+- History loads a page at a time; the graph is built over the commits actually loaded, so parents
+  beyond the current page render as dangling lane ends until more is loaded.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- LFS, git-flow, signature status and the revision tree are implemented and tested in Core but
-  have no UI yet.
+- LFS, git-flow and the revision tree are implemented and tested in Core but have no UI.
+- On macOS the published build is a `.app` bundle rather than a bare executable: recent macOS
+  kills an adhoc-signed loose binary on launch with no crash report and nothing in the log.
 - The rebase sequence-editor script is written per platform (a shell script, or a batch file on
   Windows); only the Unix path is covered by the test suite on this machine.
 - Syntax highlighting is per-line and extension-based; it will not colour a fragment that begins

@@ -21,19 +21,19 @@
                     <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontSize="12" />
                     <TextBlock Text="{Binding Directory}"
                                IsVisible="{Binding HasDirectory}"
-                               Foreground="{StaticResource DimBrush}"
+                               Foreground="{DynamicResource DimBrush}"
                                TextTrimming="CharacterEllipsis" FontSize="11" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid ColumnDefinitions="320,4,*,4,300" Background="{StaticResource PanelBackgroundBrush}">
+    <Grid ColumnDefinitions="320,4,*,4,300" Background="{DynamicResource PanelBackgroundBrush}">
 
         <!-- Staged over unstaged, the way Fork splits the index -->
         <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto,*">
 
-            <Border Grid.Row="0" Padding="12,6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Padding="12,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Grid.Column="0" Text="Staged" Classes="sectionheader" VerticalAlignment="Center" />
                     <Button Grid.Column="1" Content="Unstage All" Classes="link"
@@ -44,7 +44,7 @@
 
             <ListBox Grid.Row="1" Name="StagedList" Classes="flat"
                      ItemsSource="{Binding StagedFiles}"
-                     ItemTemplate="{StaticResource WorkingFileTemplate}"
+                     ItemTemplate="{DynamicResource WorkingFileTemplate}"
                      SelectionChanged="OnStagedSelectionChanged"
                      Background="Transparent" BorderThickness="0">
                 <ListBox.ContextMenu>
@@ -57,7 +57,7 @@
             </ListBox>
 
             <Border Grid.Row="2" Padding="12,6"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1">
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Grid.Column="0" Text="Unstaged" Classes="sectionheader" VerticalAlignment="Center" />
                     <Button Grid.Column="1" Content="Stage All" Classes="link"
@@ -67,7 +67,7 @@
 
             <ListBox Grid.Row="3" Name="UnstagedList" Classes="flat"
                      ItemsSource="{Binding UnstagedFiles}"
-                     ItemTemplate="{StaticResource WorkingFileTemplate}"
+                     ItemTemplate="{DynamicResource WorkingFileTemplate}"
                      SelectionChanged="OnUnstagedSelectionChanged"
                      Background="Transparent" BorderThickness="0">
                 <ListBox.ContextMenu>
@@ -84,24 +84,24 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
+        <GridSplitter Grid.Column="1" Background="{DynamicResource BorderBrush}" />
 
         <!-- Diff with hunk and line staging -->
-        <Grid Grid.Column="2" RowDefinitions="Auto,*" Background="{StaticResource RowBackgroundBrush}">
+        <Grid Grid.Column="2" RowDefinitions="Auto,*" Background="{DynamicResource RowBackgroundBrush}">
 
             <Border Grid.Row="0" Padding="8,5"
-                    Background="{StaticResource PanelBackgroundBrush}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <Button Name="StageLinesButton" Content="Stage Lines"
                             Command="{Binding StageSelectedLinesCommand}" FontSize="11.5" />
                     <Button Name="UnstageLinesButton" Content="Unstage Lines"
                             Command="{Binding UnstageSelectedLinesCommand}" FontSize="11.5" />
                     <TextBlock Text="Select lines in the diff, or use a hunk's own button."
-                               Foreground="{StaticResource DimBrush}" FontSize="11"
+                               Foreground="{DynamicResource DimBrush}" FontSize="11"
                                VerticalAlignment="Center" Margin="6,0,0,0" />
                     <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="{StaticResource DeletedBrush}" FontSize="11"
+                               Foreground="{DynamicResource DeletedBrush}" FontSize="11"
                                VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
@@ -132,10 +132,10 @@
                                 </StackPanel>
 
                                 <TextBlock Text="{Binding OldNumber}" FontFamily="{StaticResource MonoFont}"
-                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="4,0,0,0"
+                                           Foreground="{DynamicResource DiffGutterBrush}" FontSize="11.5" Padding="4,0,0,0"
                                            IsVisible="{Binding !IsHunkHeader}" />
                                 <TextBlock Text="{Binding NewNumber}" FontFamily="{StaticResource MonoFont}"
-                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="6,0,8,0"
+                                           Foreground="{DynamicResource DiffGutterBrush}" FontSize="11.5" Padding="6,0,8,0"
                                            IsVisible="{Binding !IsHunkHeader}" />
                                 <TextBlock Text="{Binding Marker}" FontFamily="{StaticResource MonoFont}"
                                            Classes="difftext"
@@ -155,7 +155,7 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="3" Background="{StaticResource BorderBrush}" />
+        <GridSplitter Grid.Column="3" Background="{DynamicResource BorderBrush}" />
 
         <!-- Commit box -->
         <Grid Grid.Column="4" RowDefinitions="Auto,*,Auto,Auto" Margin="10">

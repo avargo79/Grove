@@ -68,17 +68,30 @@ Reword is written to the rebase plan as `edit`: git's own `reword` opens an edit
 editors suppressed that would silently keep the original message. Stopping hands the job to the
 commit box, which is already the right place to amend a message.
 
-## M6 — Product polish
+## M6 — Product polish ✅
 
-Next up.
+- [x] Multi-repository tabs and a recent-repositories list (*Repository manager*)
+- [x] Commit search and filtering by message, author, path and date
+- [x] Incremental history paging, replacing the fixed 2000-commit cap
+- [x] Light theme alongside the dark one
+- [x] Keyboard shortcuts and a command palette
+- [x] Settings: theme, diff context, whitespace, highlighting, page size
+- [x] Self-contained builds per platform
 
-- [ ] Multi-repository tabs and a recent-repositories list (*Repository manager*)
-- [ ] Commit search and filtering by author, message, path and date
-- [ ] Incremental history paging beyond the current 2000-commit cap
-- [ ] Light theme alongside the current dark one
-- [ ] Keyboard shortcut map and a command palette
-- [ ] Settings: diff context, date format, external diff/merge tool
-- [ ] Single-file self-contained builds per platform
+External diff and merge tool configuration was not built: conflict resolution already hands off to
+the user's own `merge.tool`, so a second place to configure it would only be another thing to get
+out of sync.
+
+## Still open
+
+Deliberately not built, and worth naming rather than leaving implied:
+
+- LFS, git-flow and the revision file tree are implemented and tested in `GitFork.Core` but have
+  no UI. They are reachable from code, not from the app.
+- Syntax highlighting is per-line, so a fragment beginning inside a multi-line block comment is
+  not coloured as one.
+- The rebase sequence-editor script has a Windows branch that the suite does not exercise on a
+  Mac.
 
 ## Explicitly out of scope
 

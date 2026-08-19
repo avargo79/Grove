@@ -6,3 +6,4 @@ obj/
 coverage*.xml
 TestResults/
 .DS_Store
+artifacts/

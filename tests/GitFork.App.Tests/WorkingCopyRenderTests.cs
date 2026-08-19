@@ -25,13 +25,7 @@ public class WorkingCopyRenderTests
 
     private static async Task<(Window Window, MainViewModel ViewModel)> ShowWorkingCopyAsync(TestRepository fixture)
     {
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow { DataContext = viewModel };
-        window.Show();
-
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
-        await viewModel.PendingDiffLoad;
+        var (window, _, viewModel) = await TestShell.OpenAsync(fixture.Path);
 
         viewModel.SelectWorkingCopy();
         window.UpdateLayout();
@@ -62,12 +56,7 @@ public class WorkingCopyRenderTests
         using var fixture = TestRepository.CreateEmpty();
         fixture.Commit("first", "a.txt", "one\n");
 
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow { DataContext = viewModel };
-        window.Show();
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
-        window.UpdateLayout();
+        var (window, _, _) = await TestShell.OpenAsync(fixture.Path);
 
         var row = window.GetVisualDescendants().OfType<Border>().First(b => b.Name == "UncommittedRow");
         Assert.False(row.IsVisible);

@@ -6,31 +6,31 @@
         mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="GitFork.App.Views.ReflogWindow"
         x:DataType="vm:ReflogViewModel"
-        Background="{StaticResource WindowBackgroundBrush}"
-        Foreground="{StaticResource ForegroundBrush}"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
         Width="900" Height="600"
         WindowStartupLocation="CenterOwner"
         Title="Reflog">
 
     <DockPanel>
         <Border DockPanel.Dock="Top" Padding="12,8"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <CheckBox Name="UnreachableToggle" Content="Only unreachable commits" FontSize="11.5"
                           IsChecked="{Binding ShowOnlyUnreachable, Mode=TwoWay}" />
                 <TextBlock Text="Everything HEAD has pointed at, including commits no branch can reach."
-                           Foreground="{StaticResource MutedBrush}" FontSize="11.5"
+                           Foreground="{DynamicResource MutedBrush}" FontSize="11.5"
                            VerticalAlignment="Center" />
             </StackPanel>
         </Border>
 
         <Border DockPanel.Dock="Bottom" Padding="12,6"
-                Background="{StaticResource ToolbarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                 <TextBlock Grid.Column="0" Name="ReflogStatus" Text="{Binding StatusText}"
-                           Foreground="{StaticResource MutedBrush}" FontSize="11"
+                           Foreground="{DynamicResource MutedBrush}" FontSize="11"
                            VerticalAlignment="Center" />
                 <Button Grid.Column="1" Name="CheckoutButton" Content="Checkout"
                         Command="{Binding CheckoutCommand}" CommandParameter="{Binding SelectedEntry}" />
@@ -44,17 +44,17 @@
         <ListBox Name="ReflogList" Classes="commits"
                  ItemsSource="{Binding Entries}"
                  SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
-                 Background="{StaticResource RowBackgroundBrush}" BorderThickness="0">
+                 Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="vm:ReflogEntryViewModel">
                     <Grid ColumnDefinitions="110,70,110,*,110" VerticalAlignment="Center"
                           ToolTip.Tip="{Binding ToolTip}">
                         <TextBlock Grid.Column="0" Text="{Binding Selector}" Margin="8,0,0,0"
                                    FontFamily="{StaticResource MonoFont}" FontSize="11"
-                                   Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text="{Binding ShortSha}"
                                    FontFamily="{StaticResource MonoFont}" FontSize="11.5"
-                                   Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="2" Text="{Binding Action}" FontSize="11.5"
                                    VerticalAlignment="Center"
                                    Classes="reflogaction"
@@ -68,7 +68,7 @@
                                        VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock Grid.Column="4" Text="{Binding DateDisplay}" FontSize="12"
-                                   Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                                   Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

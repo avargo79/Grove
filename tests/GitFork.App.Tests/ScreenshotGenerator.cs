@@ -26,18 +26,14 @@ public class ScreenshotGenerator
         var repositoryPath = Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_REPO")
                              ?? Directory.GetCurrentDirectory();
 
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow
-        {
-            DataContext = viewModel,
-            Width = 1400,
-            Height = 900,
-        };
-        window.Show();
+        // GITFORK_SCREENSHOT_THEME=light captures the light palette.
+        if (Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_THEME") == "light")
+            App.ApplyTheme(GitFork.Core.AppTheme.Light);
 
-        await viewModel.LoadRepositoryAsync(repositoryPath);
-        await viewModel.PendingDetailLoad;
-        await viewModel.PendingDiffLoad;
+        var (window, _, viewModel) = await TestShell.OpenAsync(repositoryPath);
+        window.Width = 1400;
+        window.Height = 900;
+        window.UpdateLayout();
 
         var view = Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_VIEW");
 
@@ -79,12 +75,9 @@ public class ScreenshotGenerator
         fixture.Git("checkout", "--quiet", "main");
         fixture.Commit("Lower the timeout to fail faster", "config.yaml", "timeout: 5\nretries: 3\n");
 
-        var viewModel = new MainViewModel { WatchForChanges = false };
-        var window = new MainWindow { DataContext = viewModel, Width = 1400, Height = 900 };
-        window.Show();
-
-        await viewModel.LoadRepositoryAsync(fixture.Path);
-        await viewModel.PendingDetailLoad;
+        var (window, _, viewModel) = await TestShell.OpenAsync(fixture.Path);
+        window.Width = 1400;
+        window.Height = 900;
 
         viewModel.Commands!.ConfirmAsync = _ => Task.FromResult(true);
         var feature = viewModel.Sections.Single(s => s.Title == "Branches")
