@@ -108,7 +108,7 @@ public class WordDiffTests
         var (_, right) = WordDiff.Compare("a", "a very long tail");
 
         // The trailing run is one segment, not one per token.
-        Assert.Single(right.Where(s => s.IsChanged));
+        Assert.Single(right, s => s.IsChanged);
     }
 
     [Fact]

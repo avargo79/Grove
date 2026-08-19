@@ -26,6 +26,10 @@ public sealed class GitRepository
         Remotes = new GitRemoteOperations(git);
         Stashes = new GitStashOperations(git);
         Files = new GitFileOperations(git);
+        Rebase = new GitRebaseOperations(git);
+        Reflog = new GitReflogOperations(git);
+        Integrations = new GitIntegrationOperations(git);
+        Flow = new GitFlowOperations(git, Refs, History);
     }
 
     /// <summary>The write half of the API: staging, discarding and committing.</summary>
@@ -45,6 +49,18 @@ public sealed class GitRepository
 
     /// <summary>Blame, per-file history, revision trees and raw blobs.</summary>
     public GitFileOperations Files { get; }
+
+    /// <summary>Interactive rebase.</summary>
+    public GitRebaseOperations Rebase { get; }
+
+    /// <summary>The reflog, for recovering unreachable commits.</summary>
+    public GitReflogOperations Reflog { get; }
+
+    /// <summary>Signatures, submodules and LFS.</summary>
+    public GitIntegrationOperations Integrations { get; }
+
+    /// <summary>Git-flow branch conventions.</summary>
+    public GitFlowOperations Flow { get; }
 
     public string RootPath { get; }
     public string Name => Path.GetFileName(RootPath.TrimEnd(Path.DirectorySeparatorChar, '/'));

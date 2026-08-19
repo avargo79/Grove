@@ -30,6 +30,43 @@ public sealed class GitCommandRunner(string workingDirectory, string gitPath = "
         RunAsync(args, standardInput: null, ct);
 
     /// <summary>
+    /// Runs git with extra environment variables layered over the defaults. Needed where a
+    /// variable this class normally pins has to be replaced for one call — the interactive rebase
+    /// sequence editor being the case in point, since the environment beats any config setting.
+    /// </summary>
+    public async Task<GitResult> RunWithEnvironmentAsync(
+        IEnumerable<string> args, IReadOnlyDictionary<string, string> environment,
+        CancellationToken ct = default)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = gitPath,
+            WorkingDirectory = WorkingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+
+        ConfigureCommon(psi, args);
+        foreach (var (key, value) in environment)
+            psi.Environment[key] = value;
+
+        using var process = new Process { StartInfo = psi };
+        if (!process.Start())
+            throw new GitException($"Could not start '{gitPath}'.");
+
+        var stdOutTask = process.StandardOutput.ReadToEndAsync(ct);
+        var stdErrTask = process.StandardError.ReadToEndAsync(ct);
+        await process.WaitForExitAsync(ct).ConfigureAwait(false);
+
+        return new GitResult(process.ExitCode, await stdOutTask.ConfigureAwait(false),
+            await stdErrTask.ConfigureAwait(false));
+    }
+
+    /// <summary>
     /// Runs git, optionally piping <paramref name="standardInput"/> to it. Patches are fed this way
     /// rather than through a temporary file so nothing is left behind if the process is cancelled.
     /// </summary>
