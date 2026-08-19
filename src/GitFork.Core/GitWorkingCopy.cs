@@ -23,16 +23,20 @@ public sealed class GitWorkingCopy(GitCommandRunner git)
     /// staged. Untracked files have no diff, so one is synthesised against an empty blob.
     /// </summary>
     public async Task<FileDiff?> GetFileDiffAsync(
-        FileChange file, DiffSide side, bool isUntracked = false, int contextLines = 3,
+        FileChange file, DiffSide side, bool isUntracked = false, DiffOptions? options = null,
         CancellationToken ct = default)
     {
-        var args = new List<string> { "diff", "--no-color", "-M", $"--unified={contextLines}" };
+        var diffOptions = options ?? DiffOptions.Default;
+
+        var args = new List<string> { "diff", "--no-color" };
+        args.AddRange(diffOptions.ToArguments());
         if (side == DiffSide.Staged)
             args.Add("--cached");
+
         if (isUntracked)
         {
             // An untracked file is not known to git at all; --no-index diffs it against nothing.
-            args = ["diff", "--no-color", "--no-index", $"--unified={contextLines}", "--", "/dev/null", file.Path];
+            args = ["diff", "--no-color", .. diffOptions.ToArguments(), "--no-index", "--", "/dev/null", file.Path];
         }
         else
         {
@@ -48,8 +52,11 @@ public sealed class GitWorkingCopy(GitCommandRunner git)
         if (!result.Success && result.StdOut.Length == 0)
             return null;
 
+        // As above: no hunks means no differences under these options, not a failure.
         var files = DiffParser.ParseFiles(result.StdOut);
-        return files.Count > 0 ? files[0] : null;
+        return files.Count > 0
+            ? files[0]
+            : new FileDiff { HeaderLines = [], Hunks = [], Path = file.Path };
     }
 
     // ------------------------------------------------------------ staging

@@ -25,6 +25,7 @@ public sealed class GitRepository
         History = new GitHistoryOperations(git);
         Remotes = new GitRemoteOperations(git);
         Stashes = new GitStashOperations(git);
+        Files = new GitFileOperations(git);
     }
 
     /// <summary>The write half of the API: staging, discarding and committing.</summary>
@@ -41,6 +42,9 @@ public sealed class GitRepository
 
     /// <summary>Stash lifecycle.</summary>
     public GitStashOperations Stashes { get; }
+
+    /// <summary>Blame, per-file history, revision trees and raw blobs.</summary>
+    public GitFileOperations Files { get; }
 
     public string RootPath { get; }
     public string Name => Path.GetFileName(RootPath.TrimEnd(Path.DirectorySeparatorChar, '/'));
@@ -127,17 +131,34 @@ public sealed class GitRepository
 
     /// <summary>Unified diff for one file in one commit, already split into renderable lines.</summary>
     public async Task<IReadOnlyList<DiffLine>> GetCommitFileDiffAsync(
-        string sha, FileChange file, int contextLines = 3, CancellationToken ct = default)
+        string sha, FileChange file, DiffOptions? options = null, CancellationToken ct = default)
     {
-        var args = new List<string>
-        {
-            "show", "--format=", "--patch", "-M", $"--unified={contextLines}", sha, "--", file.Path,
-        };
+        var diff = await GetCommitFileDiffStructuredAsync(sha, file, options, ct).ConfigureAwait(false);
+        return diff?.ToLines() ?? [];
+    }
+
+    /// <summary>The same diff kept as hunks, for the side-by-side and word-level views.</summary>
+    public async Task<FileDiff?> GetCommitFileDiffStructuredAsync(
+        string sha, FileChange file, DiffOptions? options = null, CancellationToken ct = default)
+    {
+        var args = new List<string> { "show", "--format=", "--patch", "--no-color" };
+        args.AddRange((options ?? DiffOptions.Default).ToArguments());
+        args.Add(sha);
+        args.Add("--");
+        args.Add(file.Path);
         if (file.OldPath is not null)
             args.Add(file.OldPath);
 
         var result = await _git.RunAsync(args, ct).ConfigureAwait(false);
-        return result.Success ? DiffParser.Parse(result.StdOut) : [];
+        if (!result.Success)
+            return null;
+
+        // An empty diff is a real answer, not a failure: with whitespace ignored a file whose only
+        // change is reindentation legitimately has nothing to show.
+        var files = DiffParser.ParseFiles(result.StdOut);
+        return files.Count > 0
+            ? files[0]
+            : new FileDiff { HeaderLines = [], Hunks = [], Path = file.Path };
     }
 
     // ----------------------------------------------------------------- refs

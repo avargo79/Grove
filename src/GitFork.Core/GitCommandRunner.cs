@@ -174,6 +174,39 @@ public sealed class GitCommandRunner(string workingDirectory, string gitPath = "
         }
     }
 
+    /// <summary>
+    /// Runs git and returns its raw stdout bytes. Text decoding would corrupt binary blobs, so
+    /// image previews read through here instead.
+    /// </summary>
+    public async Task<byte[]?> RunBinaryAsync(IEnumerable<string> args, CancellationToken ct = default)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = gitPath,
+            WorkingDirectory = WorkingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        ConfigureCommon(psi, args);
+
+        using var process = new Process { StartInfo = psi };
+        if (!process.Start())
+            throw new GitException($"Could not start '{gitPath}'.");
+
+        using var buffer = new MemoryStream();
+        var copyTask = process.StandardOutput.BaseStream.CopyToAsync(buffer, ct);
+        var errorTask = process.StandardError.ReadToEndAsync(ct);
+
+        await process.WaitForExitAsync(ct).ConfigureAwait(false);
+        await copyTask.ConfigureAwait(false);
+        await errorTask.ConfigureAwait(false);
+
+        return process.ExitCode == 0 ? buffer.ToArray() : null;
+    }
+
     /// <summary>Arguments and environment shared by every invocation.</summary>
     private static void ConfigureCommon(ProcessStartInfo psi, IEnumerable<string> args)
     {
