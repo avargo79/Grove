@@ -120,6 +120,32 @@ public sealed partial class WorkingCopyViewModel(GitRepository repository) : Vie
     [ObservableProperty]
     public partial string? ErrorMessage { get; set; }
 
+    /// <summary>
+    /// Whitespace handling for the staging diff. Ignoring it makes a noisy reindent readable,
+    /// but the patch git prints then no longer describes the file on disk.
+    /// </summary>
+    [ObservableProperty]
+    public partial WhitespaceMode Whitespace { get; set; } = WhitespaceMode.Show;
+
+    /// <summary>
+    /// False while whitespace is being ignored. A patch built from such a diff does not apply:
+    /// its context lines are not the bytes in the file, so `git apply --cached` either rejects
+    /// it or, worse, silently stages something else. Whole files still stage fine, because that
+    /// path never builds a patch.
+    /// </summary>
+    /// <summary>The whitespace mode as the index a ComboBox binds to; the enum order is the list order.</summary>
+    public int WhitespaceIndex
+    {
+        get => (int)Whitespace;
+        set => Whitespace = (WhitespaceMode)Math.Clamp(value, 0, 3);
+    }
+
+    public bool CanStagePartially => Whitespace == WhitespaceMode.Show;
+
+    public string? PartialStagingHint => CanStagePartially
+        ? null
+        : "Whitespace is ignored, so hunks and lines cannot be staged — stage whole files, or show whitespace again.";
+
     public bool HasStagedFiles => StagedFiles.Count > 0;
 
     /// <summary>Amending can rewrite HEAD's message with nothing newly staged, so it bypasses the check.</summary>
@@ -184,6 +210,18 @@ public sealed partial class WorkingCopyViewModel(GitRepository repository) : Vie
 
     partial void OnCommitMessageChanged(string value) => CommitCommand.NotifyCanExecuteChanged();
 
+    partial void OnWhitespaceChanged(WhitespaceMode value)
+    {
+        OnPropertyChanged(nameof(WhitespaceIndex));
+        OnPropertyChanged(nameof(CanStagePartially));
+        OnPropertyChanged(nameof(PartialStagingHint));
+        StageHunkCommand.NotifyCanExecuteChanged();
+        UnstageHunkCommand.NotifyCanExecuteChanged();
+        StageSelectedLinesCommand.NotifyCanExecuteChanged();
+        UnstageSelectedLinesCommand.NotifyCanExecuteChanged();
+        PendingDiffLoad = ReloadDiffAsync();
+    }
+
     partial void OnIsAmendingChanged(bool value)
     {
         OnPropertyChanged(nameof(CommitButtonText));
@@ -229,7 +267,8 @@ public sealed partial class WorkingCopyViewModel(GitRepository repository) : Vie
                 file.Change,
                 file.IsStaged ? DiffSide.Staged : DiffSide.Unstaged,
                 file.IsUntracked,
-                ct: cts.Token).ConfigureAwait(true);
+                new DiffOptions { Whitespace = Whitespace },
+                cts.Token).ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
@@ -308,10 +347,10 @@ public sealed partial class WorkingCopyViewModel(GitRepository repository) : Vie
 
     // ------------------------------------------------- hunk/line commands
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanStagePartially))]
     private Task StageHunkAsync(DiffRowViewModel? row) => ApplyHunkAsync(row, PatchDirection.Stage);
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanStagePartially))]
     private Task UnstageHunkAsync(DiffRowViewModel? row) => ApplyHunkAsync(row, PatchDirection.Unstage);
 
     private Task ApplyHunkAsync(DiffRowViewModel? row, PatchDirection direction)
@@ -323,10 +362,10 @@ public sealed partial class WorkingCopyViewModel(GitRepository repository) : Vie
         return patch is null ? Task.CompletedTask : RunAsync(() => _workingCopy.ApplyToIndexAsync(patch, direction), null);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanStagePartially))]
     private Task StageSelectedLinesAsync() => ApplySelectedLinesAsync(PatchDirection.Stage);
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanStagePartially))]
     private Task UnstageSelectedLinesAsync() => ApplySelectedLinesAsync(PatchDirection.Unstage);
 
     private Task ApplySelectedLinesAsync(PatchDirection direction)

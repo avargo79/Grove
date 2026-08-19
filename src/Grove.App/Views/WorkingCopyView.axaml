@@ -93,13 +93,33 @@
                     Background="{DynamicResource PanelBackgroundBrush}"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Button Name="StageLinesButton" Content="Stage Lines"
-                            Command="{Binding StageSelectedLinesCommand}" FontSize="11.5" />
-                    <Button Name="UnstageLinesButton" Content="Unstage Lines"
-                            Command="{Binding UnstageSelectedLinesCommand}" FontSize="11.5" />
+                    <Button Name="StageLinesButton" Content="Stage Lines" Classes="compact"
+                            Command="{Binding StageSelectedLinesCommand}" />
+                    <Button Name="UnstageLinesButton" Content="Unstage Lines" Classes="compact"
+                            Command="{Binding UnstageSelectedLinesCommand}" />
+
+                    <ComboBox Name="StagingWhitespaceSelector" Width="190" FontSize="11.5"
+                              VerticalAlignment="Center" Margin="6,0,0,0"
+                              SelectedIndex="{Binding WhitespaceIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="Show whitespace changes" />
+                        <ComboBoxItem Content="Ignore whitespace changes" />
+                        <ComboBoxItem Content="Ignore all whitespace" />
+                        <ComboBoxItem Content="Ignore blank lines" />
+                    </ComboBox>
+
                     <TextBlock Text="Select lines in the diff, or use a hunk's own button."
+                               IsVisible="{Binding CanStagePartially}"
                                Foreground="{DynamicResource DimBrush}" FontSize="11"
                                VerticalAlignment="Center" Margin="6,0,0,0" />
+
+                    <!-- Why the staging buttons went quiet: a patch built from a whitespace
+                         ignored diff does not describe the file on disk, so it cannot apply. -->
+                    <TextBlock Name="PartialStagingHint" Text="{Binding PartialStagingHint}"
+                               IsVisible="{Binding !CanStagePartially}"
+                               Foreground="{DynamicResource ModifiedBrush}" FontSize="11"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" Margin="6,0,0,0" />
+
                     <TextBlock Text="{Binding ErrorMessage}"
                                Foreground="{DynamicResource DeletedBrush}" FontSize="11"
                                VerticalAlignment="Center" />
@@ -124,9 +144,11 @@
                                 <StackPanel Orientation="Horizontal" Spacing="4"
                                             Margin="2,0,6,0" IsVisible="{Binding IsHunkHeader}">
                                     <Button Content="Stage Hunk" Classes="link" FontSize="10.5"
+                                            IsVisible="{Binding $parent[UserControl].((vm:WorkingCopyViewModel)DataContext).CanStagePartially}"
                                             Command="{Binding $parent[UserControl].((vm:WorkingCopyViewModel)DataContext).StageHunkCommand}"
                                             CommandParameter="{Binding}" />
                                     <Button Content="Unstage Hunk" Classes="link" FontSize="10.5"
+                                            IsVisible="{Binding $parent[UserControl].((vm:WorkingCopyViewModel)DataContext).CanStagePartially}"
                                             Command="{Binding $parent[UserControl].((vm:WorkingCopyViewModel)DataContext).UnstageHunkCommand}"
                                             CommandParameter="{Binding}" />
                                 </StackPanel>

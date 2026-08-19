@@ -284,6 +284,12 @@ SonarQube or SonarCloud instance when one is configured.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
 - The file tree builds its nesting from git's flat path list; git has no notion of a folder object
   to read here.
+- Ignoring whitespace and staging a hunk are mutually exclusive. `git diff -w` prints context
+  lines that are not the bytes in the file, so a patch built from that output either fails to
+  apply or stages something other than what was displayed. Partial staging is disabled while the
+  mode is on rather than left to fail at apply time.
+- Diff presentation outlives the pane showing it. Selecting another commit builds a new detail
+  view model, so the mode a user picked is kept on the repository and pushed into each new pane.
 - The chrome is one style layer, not per-view markup. Colours are tokens in the two theme
   dictionaries; sizing, radius and state live in application styles keyed off control type and a
   few classes (`primary`, `compact`, `controlgroup`). A view that needs a button asks for a

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Grove.Core;
@@ -85,6 +86,17 @@ public sealed partial class DiffViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     public partial WhitespaceMode Whitespace { get; set; } = WhitespaceMode.Show;
+
+    /// <summary>
+    /// The same setting as <see cref="Whitespace"/>, as the index a ComboBox binds to. The enum
+    /// order is the dropdown order, and the setter clamps because a bound index can arrive as -1
+    /// while the list is being rebuilt.
+    /// </summary>
+    public int WhitespaceIndex
+    {
+        get => (int)Whitespace;
+        set => Whitespace = (WhitespaceMode)Math.Clamp(value, 0, 3);
+    }
 
     [ObservableProperty]
     public partial bool ShowSyntaxHighlighting { get; set; } = true;
@@ -254,7 +266,11 @@ public sealed partial class DiffViewModel : ViewModelBase, IDisposable
     // These three change what git is asked for, so the owner has to re-read the diff.
     partial void OnContextLinesChanged(int value) => OptionsChanged?.Invoke(this, EventArgs.Empty);
 
-    partial void OnWhitespaceChanged(WhitespaceMode value) => OptionsChanged?.Invoke(this, EventArgs.Empty);
+    partial void OnWhitespaceChanged(WhitespaceMode value)
+    {
+        OnPropertyChanged(nameof(WhitespaceIndex));
+        OptionsChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     partial void OnShowWordHighlightingChanged(bool value) => OptionsChanged?.Invoke(this, EventArgs.Empty);
 }

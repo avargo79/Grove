@@ -44,9 +44,12 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Bound, not hardcoded: the pane inherits a whitespace mode from settings and
+                     from the previous commit, and a fixed SelectedIndex would show "Show
+                     whitespace changes" over a diff that was ignoring it. -->
                 <ComboBox Name="WhitespaceSelector" Width="190" FontSize="11.5"
                           VerticalAlignment="Center"
-                          SelectedIndex="0" SelectionChanged="OnWhitespaceChanged">
+                          SelectedIndex="{Binding WhitespaceIndex, Mode=TwoWay}">
                     <ComboBoxItem Content="Show whitespace changes" />
                     <ComboBoxItem Content="Ignore whitespace changes" />
                     <ComboBoxItem Content="Ignore all whitespace" />

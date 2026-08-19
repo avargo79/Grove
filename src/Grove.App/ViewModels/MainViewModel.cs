@@ -108,17 +108,47 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     public string FilterDescription => Filter.Describe();
 
+    /// <summary>
+    /// Diff presentation as it currently stands: settings at first, then whatever the user last
+    /// chose in the pane. Selecting another commit builds a fresh detail view model, so without
+    /// this the mode would silently reset to the default on every click.
+    /// </summary>
+    private DiffPresentation _diffPresentation = DiffPresentation.Default;
+
+    /// <summary>
+    /// True while the stored presentation is being pushed into a pane. Each property set raises
+    /// OptionsChanged, and the handler that remembers the user's choices would otherwise capture
+    /// the pane's half-updated state — overwriting the very values still being applied.
+    /// </summary>
+    private bool _applyingPresentation;
+
     /// <summary>Applies settings that affect this repository's views.</summary>
     public void ApplySettings(AppSettings settings)
     {
         _settings = settings;
+        _diffPresentation = DiffPresentation.From(settings);
 
         if (Detail is { } detail)
+            ApplyPresentation(detail.Diff);
+
+        if (WorkingCopy is { } workingCopy)
+            workingCopy.Whitespace = settings.DiffWhitespace;
+    }
+
+    /// <summary>Pushes the stored presentation into a pane without hearing it echo back.</summary>
+    private void ApplyPresentation(DiffViewModel diff)
+    {
+        _applyingPresentation = true;
+        try
         {
-            detail.Diff.ContextLines = settings.DiffContextLines;
-            detail.Diff.Whitespace = settings.DiffWhitespace;
-            detail.Diff.ShowSyntaxHighlighting = settings.ShowSyntaxHighlighting;
-            detail.Diff.ShowWordHighlighting = settings.ShowWordHighlighting;
+            // A local copy, deliberately: ApplyTo runs against the field itself otherwise, so a
+            // handler that reassigns it mid-call changes the values still to be applied.
+            var presentation = _diffPresentation;
+            presentation.ApplyTo(diff);
+        }
+        finally
+        {
+            _applyingPresentation = false;
         }
     }
 
@@ -220,7 +250,11 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
             }
 
             _repository = repository;
-            WorkingCopy = new WorkingCopyViewModel(repository) { ConfirmDiscardAsync = ConfirmAsync };
+            WorkingCopy = new WorkingCopyViewModel(repository)
+            {
+                ConfirmDiscardAsync = ConfirmAsync,
+                Whitespace = _diffPresentation.Whitespace,
+            };
             WorkingCopy.RepositoryChanged += OnRepositoryChanged;
 
             Commands?.Dispose();
@@ -497,7 +531,16 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
                 Files = [.. detail.Files.Select(f => new FileChangeViewModel(f))],
             };
 
+            ApplyPresentation(vm.Diff);
             vm.WireOptions();
+
+            // Remember what the user picks in the pane, so it carries to the next commit too.
+            vm.Diff.OptionsChanged += (_, _) =>
+            {
+                if (!_applyingPresentation)
+                    _diffPresentation = DiffPresentation.From(vm.Diff);
+            };
+
             Detail?.Dispose();
             Detail = vm;
             vm.SelectedFile = vm.Files.Count > 0 ? vm.Files[0] : null;

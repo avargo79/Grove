@@ -129,6 +129,17 @@ conflict banner builds its own throwaway repository:
 GROVE_SCREENSHOT_CONFLICT=docs/screenshot-conflict.png dotnet test tests/Grove.App.Tests --filter WriteConflictScreenshot
 ```
 
+## Whitespace
+
+Both diff panes carry a whitespace selector: show it, ignore changes to it (`-b`), ignore all of
+it (`-w`), or ignore blank lines. The choice follows you from commit to commit and into the
+staging pane, and the default is a setting.
+
+In the staging pane, ignoring whitespace switches off hunk- and line-level staging. A patch built
+from such a diff does not describe the bytes on disk, so applying it either fails or stages
+something other than what you saw. Whole-file staging is unaffected, and the pane says why the
+buttons went quiet.
+
 ## Installing
 
 No package manager, no installer, no administrator rights, and nothing written outside your own
