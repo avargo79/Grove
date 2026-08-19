@@ -84,7 +84,7 @@ out of sync.
 
 ## Closing the gaps ✅
 
-The three features that shipped in `GitFork.Core` without a way into them from the app:
+The three features that shipped in `GitGui.Core` without a way into them from the app:
 
 - [x] Repository file tree at any revision, with file contents and syntax colouring
 - [x] Git-flow start and finish for feature, release and hotfix branches
@@ -96,8 +96,6 @@ Deliberately not built, and worth naming rather than leaving implied:
 
 - Syntax highlighting is per-line, so a fragment beginning inside a multi-line block comment is
   not coloured as one.
-- The rebase sequence-editor script has a Windows branch that the suite does not exercise on a
-  Mac.
 - The published Windows and Linux builds have not been run — only built. Only the macOS bundle
   was launched and checked.
 

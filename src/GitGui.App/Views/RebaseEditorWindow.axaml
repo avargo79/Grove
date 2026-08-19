@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GitGui.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="820" d:DesignHeight="560"
+        x:Class="GitGui.App.Views.RebaseEditorWindow"
+        x:DataType="vm:RebaseEditorViewModel"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
+        Width="820" Height="560"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding Title}">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="12,8"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{Binding Summary}"
+                           Foreground="{DynamicResource ForegroundBrush}" FontWeight="SemiBold" />
+                <TextBlock Text="Oldest first, the order git replays them in. Nothing changes until you start."
+                           Foreground="{DynamicResource MutedBrush}" FontSize="11.5" />
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="12,8"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                <Button Grid.Column="0" Name="MoveUpButton" Content="Move Up"
+                        Command="{Binding MoveUpCommand}" />
+                <Button Grid.Column="1" Name="MoveDownButton" Content="Move Down" Margin="6,0,0,0"
+                        Command="{Binding MoveDownCommand}" />
+                <TextBlock Grid.Column="2" Name="RebaseStatus" Text="{Binding StatusText}"
+                           Margin="12,0" VerticalAlignment="Center" FontSize="11.5"
+                           TextTrimming="CharacterEllipsis"
+                           Classes="opstatus"
+                           Classes.error="{Binding IsError}" />
+                <Button Grid.Column="3" Name="StartRebaseButton" Content="Start Rebase"
+                        Command="{Binding StartCommand}" />
+            </Grid>
+        </Border>
+
+        <ListBox Name="RebaseList" Classes="flat"
+                 ItemsSource="{Binding Rows}"
+                 SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                 Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:RebaseRowViewModel">
+                    <Grid ColumnDefinitions="130,70,*" Height="26">
+                        <ComboBox Grid.Column="0" Width="120" FontSize="11.5"
+                                  ItemsSource="{x:Static vm:RebaseEditorViewModel.Actions}"
+                                  SelectedItem="{Binding Action, Mode=TwoWay}" />
+                        <TextBlock Grid.Column="1" Text="{Binding ShortSha}"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="11.5"
+                                   Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{Binding Subject}"
+                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                   Classes="rebasesubject"
+                                   Classes.dropped="{Binding IsDropped}"
+                                   Classes.combined="{Binding IsCombined}"
+                                   Classes.stops="{Binding StopsHere}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

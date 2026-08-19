@@ -1,4 +1,4 @@
-# GitFork — Specification
+# git-gui — Specification
 
 A visual Git client for .NET, modelled on the interaction design of [Fork](https://git-fork.com/).
 
@@ -40,16 +40,16 @@ no GPL obligation. That was a deliberate choice — see §3.
 ## 3. Architecture
 
 ```
-GitFork.App  (Avalonia, MVVM)          — views, view models, custom graph renderer
+GitGui.App  (Avalonia, MVVM)          — views, view models, custom graph renderer
       │  project reference
       ▼
-GitFork.Core (no UI dependencies)      — git process wrapper, parsers, graph layout
+GitGui.Core (no UI dependencies)      — git process wrapper, parsers, graph layout
       │  Process.Start
       ▼
 git (the user's own binary)
 ```
 
-`GitFork.Core` deliberately references nothing from Avalonia. Everything it exposes is a plain
+`GitGui.Core` deliberately references nothing from Avalonia. Everything it exposes is a plain
 record or interface, which is what makes the whole parsing and layout surface unit-testable without
 a UI harness.
 
@@ -192,6 +192,10 @@ Two things this depends on, both of which caught the implementation out first:
   deliberate pause, not a failure. The repository state has to be consulted either way, or a paused
   rebase is reported as a completed one.
 
+The editor value is simply `cp "<our plan file>"`. Git runs it through a shell and appends its own
+plan file as the argument, so that one command is the whole program — no script file, no execute
+bit, and one code path on every platform Git itself runs on.
+
 `reword` is written to the plan as `edit` for the same reason editors are suppressed everywhere
 else — git's reword opens one, and silently keeping the old message would be worse than stopping.
 
@@ -264,7 +268,7 @@ Three layers:
   files, untracked directories and paths containing spaces. The write path is covered the same way:
   every staging test asserts on the resulting **index contents**, not on the patch text, so a patch
   that applies but stages the wrong thing still fails.
-- **Headless UI tests** in `GitFork.App.Tests` boot the real application on Avalonia's headless
+- **Headless UI tests** in `GitGui.App.Tests` boot the real application on Avalonia's headless
   platform with Skia, so the actual XAML, styles and custom controls are exercised. They assert on
   the realised visual tree, on layout (does the file list still fit on screen?), and on captured
   pixels. `ScreenshotGenerator` reuses the same path to produce the images in this repository.
@@ -282,6 +286,8 @@ SonarQube or SonarCloud instance when one is configured.
   to read here.
 - On macOS the published build is a `.app` bundle rather than a bare executable: recent macOS
   kills an adhoc-signed loose binary on launch with no crash report and nothing in the log.
+- The Windows and Linux builds have been produced but never launched; only the macOS bundle was
+  run and checked.
 - The rebase sequence-editor script is written per platform (a shell script, or a batch file on
   Windows); only the Unix path is covered by the test suite on this machine.
 - Syntax highlighting is per-line and extension-based; it will not colour a fragment that begins
