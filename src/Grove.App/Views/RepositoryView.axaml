@@ -15,10 +15,10 @@
                 Background="{DynamicResource ToolbarBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="10,7">
+                Padding="10,6">
             <!-- Opening a repository belongs to the shell now, so this bar is only about this one. -->
             <Grid ColumnDefinitions="Auto,*,Auto">
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4"
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6"
                             IsVisible="{Binding HasRepository}">
                     <Button Name="FetchButton" Content="Fetch"
                             Command="{Binding Commands.FetchCommand}" />
@@ -63,10 +63,11 @@
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal"
                             HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                    <TextBlock Text="{Binding RepositoryName}" FontWeight="SemiBold" />
-                    <TextBlock Text="·" Foreground="{DynamicResource DimBrush}"
+                    <TextBlock Text="{Binding RepositoryName}" FontWeight="SemiBold" FontSize="12.5" />
+                    <TextBlock Text="/" Foreground="{DynamicResource DimBrush}" FontSize="12.5"
                                IsVisible="{Binding HasRepository}" />
-                    <TextBlock Text="{Binding CurrentBranch}" Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Text="{Binding CurrentBranch}" FontSize="12.5" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentBrush}" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -130,15 +131,16 @@
         <Grid ColumnDefinitions="240,4,*">
 
             <!-- Sidebar -->
-            <Border Grid.Column="0" Background="{DynamicResource PanelBackgroundBrush}">
+            <Border Grid.Column="0" Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                 <ScrollViewer>
-                    <ItemsControl ItemsSource="{Binding Sections}" Margin="0,6">
+                    <ItemsControl ItemsSource="{Binding Sections}" Margin="0,10">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="vm:SidebarSectionViewModel">
-                                <StackPanel Margin="0,0,0,8">
+                                <StackPanel Margin="0,0,0,12">
                                     <TextBlock Text="{Binding Title}"
                                                Classes="sectionheader"
-                                               Margin="12,4,0,4" />
+                                               Margin="14,2,0,6" />
                                     <ListBox Classes="flat"
                                              ItemsSource="{Binding Items}"
                                              Background="Transparent"
@@ -216,32 +218,32 @@
                 </ScrollViewer>
             </Border>
 
-            <GridSplitter Grid.Column="1" Background="{DynamicResource BorderBrush}" />
+            <GridSplitter Grid.Column="1" />
 
             <!-- Commit graph over detail pane -->
             <Grid Grid.Column="2" RowDefinitions="Auto,Auto,*,Auto,4,340">
 
                 <!-- History filter -->
-                <Border Grid.Row="0" Padding="8,5"
+                <Border Grid.Row="0" Padding="10,6"
                         Background="{DynamicResource PanelBackgroundBrush}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                    <Grid ColumnDefinitions="*,150,150,Auto,Auto">
-                        <TextBox Grid.Column="0" Name="SearchMessage" FontSize="11.5"
+                    <Grid ColumnDefinitions="*,140,140,Auto,Auto">
+                        <TextBox Grid.Column="0" Name="SearchMessage" Classes="compact"
                                  PlaceholderText="Search commit messages"
                                  Text="{Binding FilterText, Mode=TwoWay}"
                                  KeyDown="OnFilterKeyDown" />
-                        <TextBox Grid.Column="1" Name="SearchAuthor" FontSize="11.5" Margin="6,0,0,0"
+                        <TextBox Grid.Column="1" Name="SearchAuthor" Classes="compact" Margin="6,0,0,0"
                                  PlaceholderText="Author"
                                  Text="{Binding FilterAuthor, Mode=TwoWay}"
                                  KeyDown="OnFilterKeyDown" />
-                        <TextBox Grid.Column="2" Name="SearchPath" FontSize="11.5" Margin="6,0,0,0"
+                        <TextBox Grid.Column="2" Name="SearchPath" Classes="compact" Margin="6,0,0,0"
                                  PlaceholderText="Path"
                                  Text="{Binding FilterPath, Mode=TwoWay}"
                                  KeyDown="OnFilterKeyDown" />
                         <Button Grid.Column="3" Name="SearchButton" Content="Search" Margin="6,0,0,0"
-                                FontSize="11.5" Command="{Binding ApplyFilterCommand}" />
+                                Classes="compact" Command="{Binding ApplyFilterCommand}" />
                         <Button Grid.Column="4" Name="ClearSearchButton" Content="Clear" Margin="6,0,0,0"
-                                FontSize="11.5" IsVisible="{Binding IsFiltered}"
+                                Classes="compact" IsVisible="{Binding IsFiltered}"
                                 Command="{Binding ClearFilterCommand}" />
                     </Grid>
                 </Border>
@@ -251,7 +253,7 @@
                         IsVisible="{Binding HasUncommittedChanges}"
                         Background="{DynamicResource RowBackgroundBrush}"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
-                        Padding="0" Height="30"
+                        Padding="0" Height="32"
                         PointerPressed="OnUncommittedRowPressed">
                     <Grid ColumnDefinitions="Auto,*,Auto">
                         <Border Grid.Column="0" Width="12" Height="12" Margin="10,0,10,0"
@@ -268,6 +270,7 @@
                 <!-- Commit list -->
                 <ListBox Grid.Row="2"
                          Name="CommitList"
+                         BorderBrush="{DynamicResource BorderBrush}"
                          Classes="commits"
                          ItemsSource="{Binding Commits}"
                          SelectedItem="{Binding SelectedCommit}"
@@ -392,7 +395,7 @@
                     </StackPanel>
                 </Border>
 
-                <GridSplitter Grid.Row="4" Background="{DynamicResource BorderBrush}"
+                <GridSplitter Grid.Row="4"
                               HorizontalAlignment="Stretch" />
 
                 <!-- Either the selected commit or the working copy, resolved by ViewLocator -->

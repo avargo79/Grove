@@ -51,7 +51,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <GridSplitter Grid.Row="1" Background="{DynamicResource BorderBrush}"
+            <GridSplitter Grid.Row="1"
                           HorizontalAlignment="Stretch" />
 
             <views:DiffView Grid.Row="2" DataContext="{Binding Diff}" />

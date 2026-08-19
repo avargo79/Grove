@@ -107,28 +107,12 @@ public class OperationsRenderTests
         var origin = banner.TranslatePoint(new Point(0, 0), window)!.Value;
 
         using var frame = window.CaptureRenderedFrame()!;
-        using var buffer = frame.Lock();
 
         // The label was once present in the tree but inherited a dark foreground, so it rendered
         // invisibly against the banner. Only the pixels can tell the difference.
-        var bright = 0;
-        unsafe
-        {
-            var scan0 = (byte*)buffer.Address;
-            var top = Math.Max(0, (int)origin.Y);
-            var bottom = Math.Min(buffer.Size.Height, (int)(origin.Y + banner.Bounds.Height));
-
-            for (var y = top; y < bottom; y++)
-            {
-                var row = scan0 + (y * buffer.RowBytes);
-                for (var x = 0; x < Math.Min(240, buffer.Size.Width); x++)
-                {
-                    var p = row + (x * 4);
-                    if (p[0] > 190 && p[1] > 190 && p[2] > 190)
-                        bright++;
-                }
-            }
-        }
+        var bright = FramePixels
+            .Read(frame, new PixelRect(0, (int)origin.Y, 240, (int)banner.Bounds.Height))
+            .Count(p => p.R > 190 && p.G > 190 && p.B > 190);
 
         var label = Find<TextBlock>(window, "BannerLabel");
         Assert.True(label.Bounds.Width > 0, $"the banner label measured to zero width: '{label.Text}'");

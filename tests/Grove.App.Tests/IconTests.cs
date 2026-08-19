@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Avalonia.Headless.XUnit;
+using Avalonia.VisualTree;
 using Avalonia.Media.Imaging;
 using Xunit;
 
@@ -24,35 +25,7 @@ public class IconTests
         return WriteableBitmap.Decode(stream);
     }
 
-    private readonly record struct Pixel(byte B, byte G, byte R, byte A);
-
-    private static List<Pixel> ReadPixels(WriteableBitmap bitmap)
-    {
-        using var buffer = bitmap.Lock();
-        var pixels = new List<Pixel>(buffer.Size.Width * buffer.Size.Height);
-
-        // A decoded PNG comes back in whichever byte order the platform decoder prefers, so the
-        // channel offsets are read from the buffer rather than assumed. Getting this wrong is
-        // invisible in a green-dominant image: only the exact colour comparisons notice.
-        var rgba = buffer.Format == Avalonia.Platform.PixelFormat.Rgba8888;
-        var (ri, bi) = rgba ? (0, 2) : (2, 0);
-
-        unsafe
-        {
-            var scan0 = (byte*)buffer.Address;
-            for (var y = 0; y < buffer.Size.Height; y++)
-            {
-                var row = scan0 + (y * buffer.RowBytes);
-                for (var x = 0; x < buffer.Size.Width; x++)
-                {
-                    var p = row + (x * 4);
-                    pixels.Add(new Pixel(p[bi], p[1], p[ri], p[3]));
-                }
-            }
-        }
-
-        return pixels;
-    }
+    private static List<Pixel> ReadPixels(WriteableBitmap bitmap) => FramePixels.Read(bitmap);
 
     /// <summary>Foliage: clearly green, and clearly not one of the slate background tones.</summary>
     private static bool IsFoliage(Pixel p) => p.A > 200 && p.G > 90 && p.G - p.R > 30 && p.G - p.B > 30;
@@ -149,5 +122,17 @@ public class IconTests
         var (window, _) = TestShell.Empty();
 
         Assert.NotNull(window.Icon);
+    }
+
+    [AvaloniaFact]
+    public void TheEmptyStateShowsTheMark()
+    {
+        var (window, _) = TestShell.Empty();
+        window.UpdateLayout();
+
+        var mark = window.GetVisualDescendants().OfType<Grove.App.Controls.GroveIcon>().Single();
+
+        Assert.True(mark.IsEffectivelyVisible);
+        Assert.True(mark.Bounds.Width > 40, "the mark rendered too small to read");
     }
 }

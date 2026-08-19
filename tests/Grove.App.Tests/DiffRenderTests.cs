@@ -163,30 +163,11 @@ public class DiffRenderTests
     private const int KeywordTolerance = 10;
 
     /// <summary>Counts pixels close to a colour, for checking something really was painted.</summary>
-    private static int CountNear(WriteableBitmap frame, Color target, int tolerance = 24)
-    {
-        using var buffer = frame.Lock();
-        var count = 0;
-
-        unsafe
-        {
-            var scan0 = (byte*)buffer.Address;
-            for (var y = 0; y < buffer.Size.Height; y++)
-            {
-                var row = scan0 + (y * buffer.RowBytes);
-                for (var x = 0; x < buffer.Size.Width; x++)
-                {
-                    var p = row + (x * 4);
-                    if (Math.Abs(p[0] - target.R) <= tolerance &&
-                        Math.Abs(p[1] - target.G) <= tolerance &&
-                        Math.Abs(p[2] - target.B) <= tolerance)
-                        count++;
-                }
-            }
-        }
-
-        return count;
-    }
+    private static int CountNear(WriteableBitmap frame, Color target, int tolerance = 24) =>
+        FramePixels.Read(frame).Count(p =>
+            Math.Abs(p.R - target.R) <= tolerance &&
+            Math.Abs(p.G - target.G) <= tolerance &&
+            Math.Abs(p.B - target.B) <= tolerance);
 
     [AvaloniaFact]
     public async Task TheWordHighlightIsActuallyPaintedInTheUnifiedView()

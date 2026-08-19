@@ -18,55 +18,71 @@
             <ResourceDictionary.ThemeDictionaries>
 
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1E1F22" />
-                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#26282C" />
-                    <SolidColorBrush x:Key="RowBackgroundBrush" Color="#1E1F22" />
-                    <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#2B2D30" />
-                    <SolidColorBrush x:Key="BorderBrush" Color="#393B40" />
+                    <!-- Surfaces, darkest to lightest. Only three levels: any more and the eye
+                         starts reading the chrome instead of the code. -->
+                    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#15171C" />
+                    <SolidColorBrush x:Key="RowBackgroundBrush" Color="#15171C" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1A1D23" />
+                    <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#1A1D23" />
+                    <SolidColorBrush x:Key="InputBackgroundBrush" Color="#101216" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#272B33" />
 
-                    <SolidColorBrush x:Key="ForegroundBrush" Color="#DFE1E5" />
-                    <SolidColorBrush x:Key="MutedBrush" Color="#8B8F96" />
-                    <SolidColorBrush x:Key="DimBrush" Color="#6B7079" />
-                    <SolidColorBrush x:Key="AccentBrush" Color="#3574F0" />
+                    <SolidColorBrush x:Key="ForegroundBrush" Color="#E3E6EB" />
+                    <SolidColorBrush x:Key="MutedBrush" Color="#98A1AE" />
+                    <SolidColorBrush x:Key="DimBrush" Color="#6A7381" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#4C8DFF" />
 
-                    <SolidColorBrush x:Key="AddedBrush" Color="#6BC46D" />
+                    <!-- Selection is a tint rather than a fill: a saturated bar across a dense
+                         list drowns out the ref badges and lane colours it sits among. -->
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#1F3054" />
+                    <SolidColorBrush x:Key="SelectionBorderBrush" Color="#2F4C86" />
+                    <SolidColorBrush x:Key="ControlHoverBrush" Color="#22262F" />
+                    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#3A404B" />
+
+                    <SolidColorBrush x:Key="AddedBrush" Color="#68C97B" />
                     <SolidColorBrush x:Key="DeletedBrush" Color="#F0736A" />
-                    <SolidColorBrush x:Key="ModifiedBrush" Color="#D9A343" />
+                    <SolidColorBrush x:Key="ModifiedBrush" Color="#E0AC4E" />
                     <SolidColorBrush x:Key="RenamedBrush" Color="#7C9EE8" />
                     <SolidColorBrush x:Key="ConflictBrush" Color="#E05D7C" />
 
-                    <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#16321F" />
-                    <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#3A1D1D" />
-                    <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#21262E" />
-                    <SolidColorBrush x:Key="DiffGutterBrush" Color="#5A5F68" />
+                    <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#12301E" />
+                    <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#361A1A" />
+                    <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#1C2129" />
+                    <SolidColorBrush x:Key="DiffGutterBrush" Color="#565D69" />
                     <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#9BDCA0" />
                     <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#F5A6A0" />
 
-                    <SolidColorBrush x:Key="WordHighlightBrush" Color="#3F4A5A" />
+                    <SolidColorBrush x:Key="WordHighlightBrush" Color="#3A455A" />
                     <SolidColorBrush x:Key="WordAddedHighlightBrush" Color="#2A6B36" />
                     <SolidColorBrush x:Key="WordRemovedHighlightBrush" Color="#7A2F2F" />
 
-                    <SolidColorBrush x:Key="BadgeHeadBrush" Color="#2E5AAC" />
-                    <SolidColorBrush x:Key="BadgeLocalBrush" Color="#3A4A63" />
-                    <SolidColorBrush x:Key="BadgeRemoteBrush" Color="#3E4148" />
-                    <SolidColorBrush x:Key="BadgeTagBrush" Color="#5A4A2A" />
-                    <SolidColorBrush x:Key="BadgeUnreachableBrush" Color="#6B3A2A" />
+                    <SolidColorBrush x:Key="BadgeHeadBrush" Color="#2B4C87" />
+                    <SolidColorBrush x:Key="BadgeLocalBrush" Color="#333B4A" />
+                    <SolidColorBrush x:Key="BadgeRemoteBrush" Color="#31353D" />
+                    <SolidColorBrush x:Key="BadgeTagBrush" Color="#54452A" />
+                    <SolidColorBrush x:Key="BadgeUnreachableBrush" Color="#5F3628" />
 
-                    <SolidColorBrush x:Key="BannerBackgroundBrush" Color="#3A2A18" />
-                    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#33FFFFFF" />
+                    <SolidColorBrush x:Key="BannerBackgroundBrush" Color="#33261440" />
+                    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#26FFFFFF" />
                 </ResourceDictionary>
 
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFFFFF" />
-                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#F3F4F6" />
                     <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FFFFFF" />
-                    <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#ECEEF1" />
-                    <SolidColorBrush x:Key="BorderBrush" Color="#D0D3D9" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#F5F6F8" />
+                    <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#F5F6F8" />
+                    <SolidColorBrush x:Key="InputBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#DFE2E7" />
 
-                    <SolidColorBrush x:Key="ForegroundBrush" Color="#1F2328" />
-                    <SolidColorBrush x:Key="MutedBrush" Color="#5C636D" />
-                    <SolidColorBrush x:Key="DimBrush" Color="#858C96" />
-                    <SolidColorBrush x:Key="AccentBrush" Color="#1F5FD8" />
+                    <SolidColorBrush x:Key="ForegroundBrush" Color="#1B1F26" />
+                    <SolidColorBrush x:Key="MutedBrush" Color="#5B6472" />
+                    <SolidColorBrush x:Key="DimBrush" Color="#8A929E" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#1F63DA" />
+
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#DCE8FC" />
+                    <SolidColorBrush x:Key="SelectionBorderBrush" Color="#A9C6F5" />
+                    <SolidColorBrush x:Key="ControlHoverBrush" Color="#EAECF0" />
+                    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#C3C8D0" />
 
                     <SolidColorBrush x:Key="AddedBrush" Color="#1F7A32" />
                     <SolidColorBrush x:Key="DeletedBrush" Color="#C0392B" />
@@ -85,14 +101,14 @@
                     <SolidColorBrush x:Key="WordAddedHighlightBrush" Color="#A8E4B6" />
                     <SolidColorBrush x:Key="WordRemovedHighlightBrush" Color="#F2B8B8" />
 
-                    <SolidColorBrush x:Key="BadgeHeadBrush" Color="#BFD6FA" />
-                    <SolidColorBrush x:Key="BadgeLocalBrush" Color="#DCE3EE" />
-                    <SolidColorBrush x:Key="BadgeRemoteBrush" Color="#E4E6EA" />
-                    <SolidColorBrush x:Key="BadgeTagBrush" Color="#F5E4BF" />
-                    <SolidColorBrush x:Key="BadgeUnreachableBrush" Color="#F6D5C4" />
+                    <SolidColorBrush x:Key="BadgeHeadBrush" Color="#C7DCFB" />
+                    <SolidColorBrush x:Key="BadgeLocalBrush" Color="#E1E6EE" />
+                    <SolidColorBrush x:Key="BadgeRemoteBrush" Color="#E8EAEE" />
+                    <SolidColorBrush x:Key="BadgeTagBrush" Color="#F6E6C3" />
+                    <SolidColorBrush x:Key="BadgeUnreachableBrush" Color="#F7DCCC" />
 
-                    <SolidColorBrush x:Key="BannerBackgroundBrush" Color="#FDF3DC" />
-                    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#22000000" />
+                    <SolidColorBrush x:Key="BannerBackgroundBrush" Color="#FDF5E2" />
+                    <SolidColorBrush x:Key="HoverOverlayBrush" Color="#1A000000" />
                 </ResourceDictionary>
 
             </ResourceDictionary.ThemeDictionaries>
@@ -110,18 +126,239 @@
             <Setter Property="Icon" Value="/Assets/grove.png" />
         </Style>
 
+        <!--
+          Chrome controls. Fluent's defaults are sized for touch and shout at this density, so
+          everything here is flattened to one height, one radius and one hairline border, and
+          colour is spent only on state.
+        -->
+        <Style Selector="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+        </Style>
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="{DynamicResource ForegroundBrush}" />
+        </Style>
+        <Style Selector="Button:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SelectionBorderBrush}" />
+        </Style>
+        <Style Selector="Button:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="TextBlock.Foreground" Value="{DynamicResource DimBrush}" />
+        </Style>
+
+        <Style Selector="SplitButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <!-- Inputs sit *below* the surface they are on, which is what makes them read as
+             something to type into rather than something to press. -->
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="SelectionBrush" Value="{DynamicResource SelectionBrush}" />
+        </Style>
+        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+
+        <Style Selector="CheckBox">
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="RadioButton">
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <!-- Thin, unobtrusive scrollbars: the content is the point. -->
+        <Style Selector="ScrollBar:vertical">
+            <Setter Property="Width" Value="10" />
+        </Style>
+        <Style Selector="ScrollBar:horizontal">
+            <Setter Property="Height" Value="10" />
+        </Style>
+        <Style Selector="ScrollBar /template/ Thumb">
+            <Setter Property="Background" Value="{DynamicResource ScrollThumbBrush}" />
+            <Setter Property="CornerRadius" Value="5" />
+        </Style>
+
+        <!-- The splitter is a grab handle, not a divider: the panels either side draw their own
+             hairline, and a 4px painted bar between them reads as a seam. -->
+        <Style Selector="GridSplitter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="GridSplitter:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        </Style>
+
+        <Style Selector="ToolTip">
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="FontSize" Value="11.5" />
+        </Style>
+
+        <!-- Tabs: an underline, not a folder tab. One repository is current; the rest are just
+             names until you click them. -->
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+        </Style>
+        <Style Selector="TabControl /template/ ItemsPresenter#PART_ItemsPresenter">
+            <Setter Property="Margin" Value="6,0,0,0" />
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TabItem:pointerover /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TabItem:selected /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+        </Style>
+
+        <Style Selector="NumericUpDown">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="NumericUpDown /template/ ButtonSpinner">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="MinHeight" Value="22" />
+        </Style>
+        <Style Selector="NumericUpDown /template/ TextBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="Padding" Value="2,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ButtonSpinner /template/ RepeatButton">
+            <Setter Property="MinHeight" Value="20" />
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontSize" Value="10" />
+        </Style>
+
+        <!-- A strip of related controls: one border around the group instead of one per control. -->
+        <Style Selector="Border.controlgroup">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+
+        <!-- The one filled button in a view: the action that view exists for. Everything else
+             stays outlined, so "which button commits" needs no reading. -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="MinHeight" Value="30" />
+        </Style>
+        <Style Selector="Button.primary /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectionBorderBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SelectionBorderBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="#FFFFFF" />
+        </Style>
+        <Style Selector="Button.primary:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="{DynamicResource DimBrush}" />
+        </Style>
+
+        <!-- Compact chrome for dense strips: the diff options bar, the filter row. -->
+        <Style Selector="Button.compact">
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="FontSize" Value="11.5" />
+        </Style>
+        <Style Selector="TextBox.compact">
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+
         <!-- Commit list rows: flat, tight, keyboard-friendly. -->
         <Style Selector="ListBox.commits ListBoxItem">
             <Setter Property="Padding" Value="0" />
-            <Setter Property="MinHeight" Value="26" />
-            <Setter Property="Height" Value="26" />
+            <Setter Property="MinHeight" Value="27" />
+            <Setter Property="Height" Value="27" />
             <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="ListBox.commits ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+        </Style>
+        <Style Selector="ListBox.commits ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="{DynamicResource ForegroundBrush}" />
         </Style>
 
         <Style Selector="ListBox.flat ListBoxItem">
-            <Setter Property="Padding" Value="6,2" />
-            <Setter Property="MinHeight" Value="24" />
-            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="MinHeight" Value="25" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Margin" Value="4,0" />
+        </Style>
+        <Style Selector="ListBox.flat ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+        </Style>
+        <Style Selector="ListBox.flat ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+            <Setter Property="TextBlock.Foreground" Value="{DynamicResource ForegroundBrush}" />
         </Style>
 
         <!-- Diff rows must not respond to hover/selection: the diff is read-only text. -->
@@ -141,8 +378,8 @@
         <!-- Ref badge colours by kind. -->
         <Style Selector="Border.badge">
             <Setter Property="Background" Value="{DynamicResource BadgeLocalBrush}" />
-            <Setter Property="CornerRadius" Value="3" />
-            <Setter Property="Padding" Value="5,1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6,1" />
             <Setter Property="Margin" Value="0,0,4,0" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -261,10 +498,12 @@
             <Setter Property="Foreground" Value="{DynamicResource ModifiedBrush}" />
         </Style>
 
+        <!-- Section headers are labels, not content: small, spaced out, and quiet. -->
         <Style Selector="TextBlock.sectionheader">
-            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource DimBrush}" />
+            <Setter Property="FontSize" Value="10.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="LetterSpacing" Value="0.8" />
         </Style>
     </Application.Styles>
 </Application>

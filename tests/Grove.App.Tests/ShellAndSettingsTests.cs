@@ -557,29 +557,8 @@ public class ShellAndSettingsTests
 
         var (window, _, _) = await TestShell.OpenAsync(fixture.Path);
 
-        static double Brightness(Avalonia.Media.Imaging.WriteableBitmap frame)
-        {
-            using var buffer = frame.Lock();
-            double total = 0;
-            var count = 0;
-
-            unsafe
-            {
-                var scan0 = (byte*)buffer.Address;
-                for (var y = 0; y < buffer.Size.Height; y += 4)
-                {
-                    var row = scan0 + (y * buffer.RowBytes);
-                    for (var x = 0; x < buffer.Size.Width; x += 4)
-                    {
-                        var p = row + (x * 4);
-                        total += (p[0] + p[1] + p[2]) / 3.0;
-                        count++;
-                    }
-                }
-            }
-
-            return total / count;
-        }
+        static double Brightness(Avalonia.Media.Imaging.WriteableBitmap frame) =>
+            FramePixels.Read(frame).Average(p => (double)p.Brightness);
 
         double dark;
         using (var frame = window.CaptureRenderedFrame()!)

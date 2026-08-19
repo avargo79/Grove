@@ -224,41 +224,11 @@ public class MainWindowRenderTests
 
     // ------------------------------------------------------------- helpers
 
-    private readonly record struct Pixel(byte B, byte G, byte R, byte A);
+    /// <summary>Reads the frame through the shared helper, which honours the buffer's byte order.</summary>
+    private static List<Pixel> ReadPixels(WriteableBitmap bitmap) => FramePixels.Read(bitmap);
 
-    /// <summary>Copies the captured frame into BGRA pixels for inspection.</summary>
-    private static List<Pixel> ReadPixels(WriteableBitmap bitmap)
-    {
-        using var buffer = bitmap.Lock();
-        var width = buffer.Size.Width;
-        var height = buffer.Size.Height;
-        var pixels = new List<Pixel>(width * height);
-
-        unsafe
-        {
-            var scan0 = (byte*)buffer.Address;
-            for (var y = 0; y < height; y++)
-            {
-                var row = scan0 + (y * buffer.RowBytes);
-                for (var x = 0; x < width; x++)
-                {
-                    var p = row + (x * 4);
-                    pixels.Add(new Pixel(p[0], p[1], p[2], p[3]));
-                }
-            }
-        }
-
-        return pixels;
-    }
-
-    private static double AverageBrightness(List<Pixel> pixels) =>
-        pixels.Average(p => (p.R + p.G + p.B) / 3.0);
+    private static double AverageBrightness(List<Pixel> pixels) => pixels.Average(p => p.Brightness);
 
     /// <summary>True for colours far more vivid than any theme surface or text colour.</summary>
-    private static bool IsSaturated(Pixel p)
-    {
-        var max = Math.Max(p.R, Math.Max(p.G, p.B));
-        var min = Math.Min(p.R, Math.Min(p.G, p.B));
-        return max > 90 && max - min > 60;
-    }
+    private static bool IsSaturated(Pixel p) => Math.Max(p.R, Math.Max(p.G, p.B)) > 90 && p.Saturation > 60;
 }

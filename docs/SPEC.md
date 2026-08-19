@@ -284,6 +284,18 @@ SonarQube or SonarCloud instance when one is configured.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
 - The file tree builds its nesting from git's flat path list; git has no notion of a folder object
   to read here.
+- The chrome is one style layer, not per-view markup. Colours are tokens in the two theme
+  dictionaries; sizing, radius and state live in application styles keyed off control type and a
+  few classes (`primary`, `compact`, `controlgroup`). A view that needs a button asks for a
+  button.
+- Selection is a tint rather than a fill. A saturated bar across a dense commit list drowns out
+  the ref badges and lane colours that share the row, which are the two things worth seeing.
+- Splitters are grab handles, not dividers: they paint nothing until hovered, and the panels
+  either side draw their own hairline. A painted 4px bar between panels reads as a seam.
+- Captured frames are read through one helper that takes the byte order from the locked buffer.
+  Avalonia hands back `Rgba8888` on some platforms and `Bgra8888` on others, and the mistake is
+  nearly invisible: brightness, saturation and "these regions differ" all survive a red/blue
+  swap, so it only surfaces when a test compares against a literal colour.
 - The application icon is drawn rather than stored: a control renders it at each size the
   platforms ask for, and `scripts/make-icons.sh` packs those into `.png`, `.ico` and `.icns`. The
   packed files are committed so the build needs no Mac and no image tooling.

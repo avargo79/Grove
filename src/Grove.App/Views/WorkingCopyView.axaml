@@ -84,7 +84,7 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Background="{DynamicResource BorderBrush}" />
+        <GridSplitter Grid.Column="1" />
 
         <!-- Diff with hunk and line staging -->
         <Grid Grid.Column="2" RowDefinitions="Auto,*" Background="{DynamicResource RowBackgroundBrush}">
@@ -155,7 +155,7 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="3" Background="{DynamicResource BorderBrush}" />
+        <GridSplitter Grid.Column="3" />
 
         <!-- Commit box -->
         <Grid Grid.Column="4" RowDefinitions="Auto,*,Auto,Auto" Margin="10">
@@ -176,7 +176,7 @@
             </StackPanel>
 
             <StackPanel Grid.Row="3" Spacing="6">
-                <Button Name="CommitButton"
+                <Button Name="CommitButton" Classes="primary"
                         Content="{Binding CommitButtonText}"
                         Command="{Binding CommitCommand}"
                         HorizontalAlignment="Stretch"

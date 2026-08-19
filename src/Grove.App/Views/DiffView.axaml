@@ -12,30 +12,37 @@
     <Grid RowDefinitions="Auto,*" Background="{DynamicResource RowBackgroundBrush}">
 
         <!-- Presentation options -->
-        <Border Grid.Row="0" Padding="8,4"
+        <Border Grid.Row="0" Padding="8,5"
                 Background="{DynamicResource PanelBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <StackPanel Orientation="Horizontal" Spacing="0">
-                    <RadioButton Name="UnifiedToggle" Content="Unified" GroupName="DiffMode"
-                                 FontSize="11.5" VerticalAlignment="Center"
-                                 IsChecked="{Binding IsUnified, Mode=OneWay}"
-                                 IsCheckedChanged="OnUnifiedChecked" />
-                    <RadioButton Name="SideBySideToggle" Content="Side by side" GroupName="DiffMode"
-                                 FontSize="11.5" VerticalAlignment="Center" Margin="10,0,0,0"
-                                 IsChecked="{Binding IsSideBySide, Mode=OneWay}"
-                                 IsCheckedChanged="OnSideBySideChecked" />
-                </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <!-- Mode, context and whitespace all change how the same patch is presented, so
+                     they read as one strip rather than five loose controls. -->
+                <Border Classes="controlgroup">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <RadioButton Name="UnifiedToggle" Content="Unified" GroupName="DiffMode"
+                                     FontSize="11.5" VerticalAlignment="Center"
+                                     IsChecked="{Binding IsUnified, Mode=OneWay}"
+                                     IsCheckedChanged="OnUnifiedChecked" />
+                        <RadioButton Name="SideBySideToggle" Content="Side by side" GroupName="DiffMode"
+                                     FontSize="11.5" VerticalAlignment="Center"
+                                     IsChecked="{Binding IsSideBySide, Mode=OneWay}"
+                                     IsCheckedChanged="OnSideBySideChecked" />
+                    </StackPanel>
+                </Border>
 
-                <Rectangle Width="1" Fill="{DynamicResource BorderBrush}" Margin="4,2" />
-
-                <TextBlock Text="Context" VerticalAlignment="Center" FontSize="11.5"
-                           Foreground="{DynamicResource MutedBrush}" />
-                <!-- Wide enough that the value itself is visible, not just the spinner arrows. -->
-                <NumericUpDown Name="ContextInput" Value="{Binding ContextLines, Mode=TwoWay}"
-                               Minimum="0" Maximum="50" Increment="1"
-                               Width="120" FormatString="0"
-                               FontSize="11.5" VerticalAlignment="Center" />
+                <Border Classes="controlgroup">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="Context" VerticalAlignment="Center" FontSize="11.5"
+                                   Foreground="{DynamicResource MutedBrush}" />
+                        <!-- Wide enough that the value itself is visible, not just the spinner arrows. -->
+                        <NumericUpDown Name="ContextInput" Value="{Binding ContextLines, Mode=TwoWay}"
+                                       Minimum="0" Maximum="50" Increment="1"
+                                       Width="104" FormatString="0" BorderThickness="0"
+                                       Background="Transparent"
+                                       FontSize="11.5" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
 
                 <ComboBox Name="WhitespaceSelector" Width="190" FontSize="11.5"
                           VerticalAlignment="Center"
@@ -46,10 +53,14 @@
                     <ComboBoxItem Content="Ignore blank lines" />
                 </ComboBox>
 
-                <CheckBox Name="SyntaxToggle" Content="Syntax" FontSize="11.5"
-                          IsChecked="{Binding ShowSyntaxHighlighting, Mode=TwoWay}" />
-                <CheckBox Name="WordToggle" Content="Word diff" FontSize="11.5"
-                          IsChecked="{Binding ShowWordHighlighting, Mode=TwoWay}" />
+                <Border Classes="controlgroup">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <CheckBox Name="SyntaxToggle" Content="Syntax" FontSize="11.5"
+                                  IsChecked="{Binding ShowSyntaxHighlighting, Mode=TwoWay}" />
+                        <CheckBox Name="WordToggle" Content="Word diff" FontSize="11.5"
+                                  IsChecked="{Binding ShowWordHighlighting, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
 

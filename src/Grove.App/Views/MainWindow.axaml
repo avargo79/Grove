@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Grove.App.ViewModels"
         xmlns:views="using:Grove.App.Views"
+        xmlns:controls="using:Grove.App.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
@@ -77,9 +78,11 @@
 
         <!-- Nothing open yet -->
         <StackPanel Name="EmptyState" IsVisible="{Binding HasNoRepositories}"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14">
+            <!-- The mark itself, at the one moment there is nothing else to look at. -->
+            <controls:GroveIcon Width="72" Height="72" HorizontalAlignment="Center" Opacity="0.85" />
             <TextBlock Text="No repository open"
-                       FontSize="16" HorizontalAlignment="Center" />
+                       FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" />
             <TextBlock Text="Open one to get started, or pick a recent repository."
                        Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" />
         </StackPanel>

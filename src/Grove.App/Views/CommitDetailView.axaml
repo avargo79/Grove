@@ -13,28 +13,35 @@
 
         <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
 
-            <Border Grid.Row="0" Padding="12,10" MaxHeight="220"
+            <Border Grid.Row="0" Padding="14,12" MaxHeight="220"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" FontSize="13"
+                                   TextWrapping="Wrap" LineHeight="18" />
                         <SelectableTextBlock Text="{Binding Body}"
                                              IsVisible="{Binding HasBody}"
-                                             TextWrapping="Wrap"
+                                             TextWrapping="Wrap" LineHeight="17"
                                              Foreground="{DynamicResource MutedBrush}"
-                                             FontSize="12" Margin="0,2" />
-                        <TextBlock Text="{Binding AuthorLine}"
-                                   Foreground="{DynamicResource MutedBrush}" FontSize="11.5" />
-                        <TextBlock Text="{Binding AuthoredOn}"
-                                   Foreground="{DynamicResource DimBrush}" FontSize="11.5" />
-                        <SelectableTextBlock Text="{Binding Sha}"
-                                             FontFamily="{StaticResource MonoFont}"
-                                             Foreground="{DynamicResource DimBrush}" FontSize="11" />
+                                             FontSize="11.5" Margin="0,2,0,4" />
+
+                        <!-- Who and when, then the sha: metadata reads as one block under the
+                             message rather than as three more lines of it. -->
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding AuthorLine}"
+                                       Foreground="{DynamicResource MutedBrush}" FontSize="11.5" />
+                            <TextBlock Text="{Binding AuthoredOn}"
+                                       Foreground="{DynamicResource DimBrush}" FontSize="11.5" />
+                            <SelectableTextBlock Text="{Binding Sha}"
+                                                 FontFamily="{StaticResource MonoFont}"
+                                                 Foreground="{DynamicResource DimBrush}" FontSize="11"
+                                                 Margin="0,2,0,0" />
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
 
-            <Border Grid.Row="1" Padding="12,6">
+            <Border Grid.Row="1" Padding="14,8,14,4">
                 <TextBlock Text="{Binding FileCountDisplay}" Classes="sectionheader" />
             </Border>
 
@@ -73,9 +80,11 @@
             </ListBox>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Background="{DynamicResource BorderBrush}" />
+        <GridSplitter Grid.Column="1" />
 
-        <views:DiffView Grid.Column="2" DataContext="{Binding Diff}" />
+        <Border Grid.Column="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
+            <views:DiffView DataContext="{Binding Diff}" />
+        </Border>
 
     </Grid>
 </UserControl>
