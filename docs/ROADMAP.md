@@ -44,20 +44,20 @@ The daily-driver loop.
 - [x] Tag creation and deletion
 - [x] Stash push / apply / pop / drop with a diff preview
 
-## M4 — Diff and history depth
+## M4 — Diff and history depth ✅
 
-Next up.
-
-- [ ] Side-by-side diff view (*Side-by-Side Diff*)
-- [ ] Word-level intra-line highlighting
-- [ ] Syntax highlighting in the diff
-- [ ] Adjustable context lines and whitespace-ignoring modes
-- [ ] File history view — follow a single path through history (*History View*)
-- [ ] Blame view with per-line commit attribution (*Blame View*)
-- [ ] Image diffs for common formats (*Image Diffs*)
-- [ ] Repository file tree at any revision
+- [x] Side-by-side diff view (*Side-by-Side Diff*)
+- [x] Word-level intra-line highlighting
+- [x] Syntax highlighting in the diff
+- [x] Adjustable context lines and whitespace-ignoring modes
+- [x] File history view — follow a single path through history (*History View*)
+- [x] Blame view with per-line commit attribution (*Blame View*)
+- [x] Image diffs for common formats (*Image Diffs*)
+- [x] Repository file tree at any revision (available in Core; no UI yet)
 
 ## M5 — Advanced workflows
+
+Next up.
 
 - [ ] Interactive rebase editor: reorder, squash, edit, drop (*Interactive rebase*)
 - [ ] Reflog browser for recovering lost commits (*Reflog*)

@@ -143,13 +143,41 @@ Two things this depends on:
 Long-running network commands stream their stderr through `RunWithProgressAsync`, which splits on
 both `\n` and `\r` because git writes progress as carriage-return updates on a single line.
 
-### 3.5 Refreshing
+### 3.5 Reading a diff
+
+Three pieces sit between git's unified diff and what ends up on screen.
+
+**Word-level diffing.** Git reports a one-word edit as a whole line removed and a whole line added.
+`WordDiff` pairs each removal with the addition that follows it and runs an LCS over word-ish
+tokens, where punctuation is its own token — otherwise a changed bracket marks the whole expression
+as changed. Only runs of removals immediately followed by runs of additions are paired; an
+unrelated insertion has nothing to be compared against.
+
+**Side-by-side.** `SideBySideDiff` puts each removal opposite its replacement and pads whichever
+side runs out, so the two columns never drift apart. Every row has at least one populated side.
+
+**Syntax highlighting.** `SyntaxHighlighter` is deliberately small — comments, strings, numbers and
+keywords, per line, no grammar files and no TextMate engine. A diff shows fragments of files out of
+context, so a real parser would not have the surrounding code it needs anyway. Multi-line block
+comments are not tracked across calls for the same reason: guessing wrong would mis-colour every
+line after an unclosed quote.
+
+These two colourings partition the same line at different boundaries, so `DiffRunBuilder` cuts runs
+at the union of both. A changed word that spans a keyword boundary keeps its syntax colour *and* its
+highlight rather than having to pick one.
+
+Options — context lines, whitespace modes, rename detection — travel as a `DiffOptions` record and
+change what git is asked for, so the view re-reads when they change. Presentation-only toggles
+(syntax on/off, unified/side-by-side) do not: both layouts are built at load time so switching is
+free.
+
+### 3.6 Refreshing
 
 A debounced `RepositoryWatcher` watches the work tree and `.git`, coalescing bursts (editor
 autosaves, git's multi-file writes) into a single reload. The work-tree watcher ignores `.git`
 entirely — the dedicated watcher covers it, and git's lock files would otherwise fire constantly.
 
-### 3.6 Threading
+### 3.7 Threading
 
 All git calls are async over `Process`. Selection changes cancel the in-flight detail/diff load
 through a `CancellationTokenSource`, so holding an arrow key down does not queue up work.
@@ -166,6 +194,8 @@ through a `CancellationTokenSource`, so holding an arrow key down does not queue
 | `RepositoryState` | `.git` marker files + `git diff --diff-filter=U` |
 | `StashEntry` | `git stash list --format=…` (the reflog, not `for-each-ref`) |
 | `GitRemote` | `git remote -v` |
+| `BlameLine` | `git blame --porcelain` |
+| `TreeEntry` | `git ls-tree -r --long -z` |
 | `FileDiff` / `DiffHunk` | `git diff [--cached] -M` → `DiffParser.ParseFiles` |
 
 The stash list comes from `git stash list` rather than `git for-each-ref`, because the latter only
@@ -204,7 +234,10 @@ SonarQube or SonarCloud instance when one is configured.
 - The graph is built over the commits actually returned, so parents beyond the cap render as
   dangling lane ends.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- Interactive rebase, blame and file history are not implemented yet (M4/M5).
+- Interactive rebase and the reflog browser are not implemented yet (M5).
+- The revision tree is available in Core but has no UI yet.
+- Syntax highlighting is per-line and extension-based; it will not colour a fragment that begins
+  inside a multi-line block comment.
 - Conflict resolution hands off to the user's own editor or `merge.tool`; there is no built-in
   three-way merge view.
 - Discarding changes is genuinely destructive and is always gated behind a confirmation dialog.

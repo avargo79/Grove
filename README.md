@@ -12,14 +12,18 @@ The staging pane, with hunk- and line-level staging:
 
 ![The working copy pane with staged and unstaged files, a diff and the commit box](docs/screenshot-staging.png)
 
+Side-by-side, with word-level and syntax colouring:
+
+![A side-by-side diff with syntax colouring and word-level highlights](docs/screenshot-sidebyside.png)
+
 A conflicted merge, with the way out offered up front:
 
 ![A merge in progress, with a banner offering Continue or Abort](docs/screenshot-conflict.png)
 
 ## Current state
 
-Milestones 1 to 3 are complete: browsing history, the full staging and commit loop, and
-branching, merging and remote operations.
+Milestones 1 to 4 are complete: browsing history, the full staging and commit loop, branching,
+merging and remote operations, and the deeper diff and history views.
 
 **Browsing**
 
@@ -44,7 +48,16 @@ branching, merging and remote operations.
 - Cherry-pick, revert and reset from the commit context menu
 - Stash push, apply, pop and drop
 
-Side-by-side diffs, blame and interactive rebase are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Reading code**
+
+- Side-by-side and unified diffs, switchable without re-reading anything
+- Word-level highlighting, so a one-word edit reads as one word
+- Syntax colouring for the common languages, with no extra dependencies
+- Adjustable context and whitespace-ignoring modes
+- Blame with per-line attribution, and per-file history that follows renames
+- Image diffs shown before and after
+
+Interactive rebase and the reflog browser are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Running it
 

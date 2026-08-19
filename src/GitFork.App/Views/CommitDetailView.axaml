@@ -1,11 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:GitFork.App.ViewModels"
+             xmlns:views="using:GitFork.App.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="340"
              x:Class="GitFork.App.Views.CommitDetailView"
-             x:DataType="vm:CommitDetailViewModel">
+             x:DataType="vm:CommitDetailViewModel"
+             AttachedToVisualTree="OnAttachedToTree">
 
     <Grid ColumnDefinitions="320,4,*" Background="{StaticResource PanelBackgroundBrush}">
 
@@ -43,6 +45,14 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="vm:FileChangeViewModel">
                         <Grid ColumnDefinitions="16,*" ToolTip.Tip="{Binding ToolTip}">
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Blame this file…"
+                                              Click="OnBlameClicked" />
+                                    <MenuItem Header="File history…"
+                                              Click="OnFileHistoryClicked" />
+                                </ContextMenu>
+                            </Grid.ContextMenu>
                             <TextBlock Grid.Column="0" Text="{Binding StatusGlyph}"
                                        Classes="status"
                                        Classes.added="{Binding IsAdded}"
@@ -65,38 +75,7 @@
 
         <GridSplitter Grid.Column="1" Background="{StaticResource BorderBrush}" />
 
-        <Border Grid.Column="2" Background="{StaticResource RowBackgroundBrush}">
-            <ListBox Classes="diff"
-                     ItemsSource="{Binding DiffLines}"
-                     Background="Transparent" BorderThickness="0"
-                     SelectionMode="Single"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="vm:DiffLineViewModel">
-                        <Border Classes="diffline"
-                                Classes.added="{Binding IsAdded}"
-                                Classes.removed="{Binding IsRemoved}"
-                                Classes.hunk="{Binding IsHunkHeader}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding OldNumber}" FontFamily="{StaticResource MonoFont}"
-                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="4,0,0,0" />
-                                <TextBlock Text="{Binding NewNumber}" FontFamily="{StaticResource MonoFont}"
-                                           Foreground="{StaticResource DiffGutterBrush}" FontSize="11.5" Padding="6,0,8,0" />
-                                <TextBlock Text="{Binding Marker}" FontFamily="{StaticResource MonoFont}"
-                                           Classes="difftext"
-                                           Classes.added="{Binding IsAdded}"
-                                           Classes.removed="{Binding IsRemoved}" FontSize="11.5" />
-                                <TextBlock Text="{Binding Text}" FontFamily="{StaticResource MonoFont}"
-                                           Classes="difftext"
-                                           Classes.added="{Binding IsAdded}"
-                                           Classes.removed="{Binding IsRemoved}"
-                                           Classes.hunk="{Binding IsHunkHeader}"
-                                           Classes.header="{Binding IsHeader}" FontSize="11.5" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Border>
+        <views:DiffView Grid.Column="2" DataContext="{Binding Diff}" />
+
     </Grid>
 </UserControl>

@@ -72,10 +72,14 @@ public sealed partial class CommitDetailViewModel(GitRepository repository) : Vi
     [ObservableProperty]
     public partial FileChangeViewModel? SelectedFile { get; set; }
 
-    public System.Collections.ObjectModel.ObservableCollection<DiffLineViewModel> DiffLines { get; } = [];
+    /// <summary>The diff pane: unified or side-by-side, with its own presentation options.</summary>
+    public DiffViewModel Diff { get; } = new();
 
     /// <summary>The in-flight diff load, exposed so tests can await selection side effects.</summary>
     internal Task PendingDiffLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>Re-reads the diff when an option changes what git is asked for.</summary>
+    public void WireOptions() => Diff.OptionsChanged += (_, _) => PendingDiffLoad = LoadDiffAsync(SelectedFile);
 
     partial void OnSelectedFileChanged(FileChangeViewModel? value)
     {
@@ -91,10 +95,10 @@ public sealed partial class CommitDetailViewModel(GitRepository repository) : Vi
             previous.Dispose();
         }
 
-        DiffLines.Clear();
         if (file is null)
         {
             _diffCts = null;
+            Diff.Load(null, string.Empty);
             return;
         }
 
@@ -103,20 +107,44 @@ public sealed partial class CommitDetailViewModel(GitRepository repository) : Vi
 
         try
         {
-            var lines = await repository
-                .GetCommitFileDiffAsync(Commit.Sha, file.Change, ct: cts.Token)
+            // An image has no useful text diff; show the two versions instead.
+            if (GitFileOperations.IsImagePath(file.Change.Path))
+            {
+                await LoadImageAsync(file, cts.Token).ConfigureAwait(true);
+                return;
+            }
+
+            var diff = await repository
+                .GetCommitFileDiffStructuredAsync(Commit.Sha, file.Change, Diff.Options, cts.Token)
                 .ConfigureAwait(true);
 
             if (cts.IsCancellationRequested)
                 return;
 
-            foreach (var line in lines)
-                DiffLines.Add(new DiffLineViewModel(line));
+            Diff.Load(diff, file.Change.Path);
         }
         catch (OperationCanceledException)
         {
             // Superseded by a newer selection.
         }
+    }
+
+    private async Task LoadImageAsync(FileChangeViewModel file, CancellationToken ct)
+    {
+        // The parent revision is where the "before" comes from; a root commit has none.
+        var parent = Commit.ParentShas.Count > 0 ? Commit.ParentShas[0] : null;
+
+        var before = parent is null
+            ? null
+            : await repository.Files.GetBlobAsync(parent, file.Change.OldPath ?? file.Change.Path, ct)
+                .ConfigureAwait(true);
+
+        var after = file.Change.Kind == ChangeKind.Deleted
+            ? null
+            : await repository.Files.GetBlobAsync(Commit.Sha, file.Change.Path, ct).ConfigureAwait(true);
+
+        if (!ct.IsCancellationRequested)
+            Diff.LoadImage(ImageDiffViewModel.Create(before, after));
     }
 
     public string Subject => Commit.Subject;

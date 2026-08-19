@@ -24,6 +24,40 @@ public partial class MainWindow : Window
         vm.PromptAsync = PromptAsync;
     }
 
+    /// <summary>
+    /// Wires a freshly realised commit detail view to this window, so its file context menu can
+    /// open the blame and history windows.
+    /// </summary>
+    internal void AttachDetailView(CommitDetailView view)
+    {
+        view.OpenBlameAsync = OpenBlameAsync;
+        view.OpenFileHistoryAsync = OpenFileHistoryAsync;
+    }
+
+    private async Task OpenBlameAsync(ViewModels.FileChangeViewModel file, string? revision)
+    {
+        if (DataContext is not MainViewModel { Repository: { } repository })
+            return;
+
+        var viewModel = new ViewModels.BlameViewModel(repository);
+        var window = new BlameWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync(file.Change.Path, revision);
+    }
+
+    private async Task OpenFileHistoryAsync(ViewModels.FileChangeViewModel file)
+    {
+        if (DataContext is not MainViewModel { Repository: { } repository })
+            return;
+
+        var viewModel = new ViewModels.FileHistoryViewModel(repository);
+        var window = new FileHistoryWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync(file.Change.Path);
+    }
+
     /// <summary>Selecting the pinned row hands the lower pane to the working copy.</summary>
     private void OnUncommittedRowPressed(object? sender, PointerPressedEventArgs e)
     {

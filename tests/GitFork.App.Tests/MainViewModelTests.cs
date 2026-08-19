@@ -210,8 +210,8 @@ public class MainViewModelTests
         var file = Assert.Single(vm.Detail!.Files);
         Assert.Equal("README.md", file.Change.Path);
         Assert.Same(file, vm.Detail.SelectedFile);
-        Assert.Contains(vm.Detail!.DiffLines, l => l.IsAdded && l.Text == "changed");
-        Assert.Contains(vm.Detail!.DiffLines, l => l.IsRemoved && l.Text == "world");
+        Assert.Contains(vm.Detail!.Diff.UnifiedRows, l => l.IsAdded && l.Text == "changed");
+        Assert.Contains(vm.Detail!.Diff.UnifiedRows, l => l.IsRemoved && l.Text == "world");
     }
 
     [Fact]
@@ -229,8 +229,8 @@ public class MainViewModelTests
         vm.Detail.SelectedFile = vm.Detail.Files.Single(f => f.Change.Path == "b.txt");
         await vm.PendingDiffLoad;
 
-        Assert.Contains(vm.Detail!.DiffLines, l => l.IsAdded && l.Text == "two");
-        Assert.DoesNotContain(vm.Detail!.DiffLines, l => l.Text == "ONE");
+        Assert.Contains(vm.Detail!.Diff.UnifiedRows, l => l.IsAdded && l.Text == "two");
+        Assert.DoesNotContain(vm.Detail!.Diff.UnifiedRows, l => l.Text == "ONE");
     }
 
     [Fact]

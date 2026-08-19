@@ -36,6 +36,11 @@
             <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#21262E" />
             <SolidColorBrush x:Key="DiffGutterBrush" Color="#5A5F68" />
 
+            <!-- Word-level highlight behind the words that actually changed -->
+            <SolidColorBrush x:Key="WordHighlightBrush" Color="#3F4A5A" />
+            <SolidColorBrush x:Key="WordAddedHighlightBrush" Color="#2A6B36" />
+            <SolidColorBrush x:Key="WordRemovedHighlightBrush" Color="#7A2F2F" />
+
             <!-- Ref badges -->
             <SolidColorBrush x:Key="BadgeHeadBrush" Color="#2E5AAC" />
             <SolidColorBrush x:Key="BadgeLocalBrush" Color="#3A4A63" />

@@ -39,9 +39,13 @@ public class ScreenshotGenerator
         await viewModel.PendingDetailLoad;
         await viewModel.PendingDiffLoad;
 
-        // GITFORK_SCREENSHOT_VIEW=working captures the staging pane instead of a commit.
-        if (Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_VIEW") == "working")
+        var view = Environment.GetEnvironmentVariable("GITFORK_SCREENSHOT_VIEW");
+
+        // Which pane to capture: the staging view, or the two-column diff.
+        if (view == "working")
             viewModel.SelectWorkingCopy();
+        else if (view == "sidebyside" && viewModel.Detail is { } detail)
+            detail.Diff.Mode = DiffViewMode.SideBySide;
 
         window.UpdateLayout();
 

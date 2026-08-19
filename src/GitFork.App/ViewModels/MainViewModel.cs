@@ -79,6 +79,9 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
 
     public bool HasRepository => _repository is not null;
 
+    /// <summary>The open repository, for views that need to start their own queries.</summary>
+    public GitRepository? Repository => _repository;
+
     /// <summary>The in-flight detail load, exposed so tests can await selection side effects.</summary>
     internal Task PendingDetailLoad { get; private set; } = Task.CompletedTask;
 
@@ -389,6 +392,7 @@ public sealed partial class MainViewModel : ViewModelBase, IDisposable
                 Files = [.. detail.Files.Select(f => new FileChangeViewModel(f))],
             };
 
+            vm.WireOptions();
             Detail = vm;
             vm.SelectedFile = vm.Files.Count > 0 ? vm.Files[0] : null;
         }
