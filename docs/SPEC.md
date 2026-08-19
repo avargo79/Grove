@@ -278,7 +278,8 @@ SonarQube or SonarCloud instance when one is configured.
 - History loads a page at a time; the graph is built over the commits actually loaded, so parents
   beyond the current page render as dangling lane ends until more is loaded.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- LFS, git-flow and the revision tree are implemented and tested in Core but have no UI.
+- The file tree builds its nesting from git's flat path list; git has no notion of a folder object
+  to read here.
 - On macOS the published build is a `.app` bundle rather than a bare executable: recent macOS
   kills an adhoc-signed loose binary on launch with no crash report and nothing in the log.
 - The rebase sequence-editor script is written per platform (a shell script, or a batch file on

@@ -115,6 +115,32 @@ public partial class MainWindow : Window
         await viewModel.LoadAsync(upstream);
     }
 
+    internal async Task OpenFileTreeAsync(MainViewModel? main, string revision)
+    {
+        if (main?.Repository is not { } repository)
+            return;
+
+        var viewModel = new FileTreeViewModel(repository);
+        var window = new FileTreeWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync(revision);
+    }
+
+    internal async Task OpenIntegrationsAsync(MainViewModel? main)
+    {
+        if (main?.Repository is not { } repository)
+            return;
+
+        var viewModel = new IntegrationsViewModel(repository);
+        viewModel.RepositoryChanged += (_, _) => _ = main.RefreshCommand.ExecuteAsync(null);
+
+        var window = new IntegrationsWindow { DataContext = viewModel };
+        window.Show(this);
+
+        await viewModel.LoadAsync();
+    }
+
     internal async Task OpenBlameAsync(MainViewModel? main, FileChangeViewModel file, string? revision)
     {
         if (main?.Repository is not { } repository)

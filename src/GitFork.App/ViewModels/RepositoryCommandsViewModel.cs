@@ -307,6 +307,63 @@ public sealed partial class RepositoryCommandsViewModel(GitRepository repository
         return await repository.History.ResetAsync(row.Sha, mode).ConfigureAwait(true);
     });
 
+    // ------------------------------------------------------------ gitflow
+
+    [RelayCommand]
+    private Task StartFeatureAsync() => StartFlowAsync(FlowBranchKind.Feature);
+
+    [RelayCommand]
+    private Task StartReleaseAsync() => StartFlowAsync(FlowBranchKind.Release);
+
+    [RelayCommand]
+    private Task StartHotfixAsync() => StartFlowAsync(FlowBranchKind.Hotfix);
+
+    private Task StartFlowAsync(FlowBranchKind kind) => RunAsync(async () =>
+    {
+        var name = await PromptForAsync(
+            $"Start a {kind.ToString().ToLowerInvariant()}",
+            $"Name for the new {kind.ToString().ToLowerInvariant()} branch:").ConfigureAwait(true);
+
+        return name is null
+            ? OperationResult.Cancelled
+            : await repository.Flow.StartAsync(kind, name).ConfigureAwait(true);
+    });
+
+    /// <summary>
+    /// Finishes whichever flow branch is currently checked out. Merging into two branches and then
+    /// deleting is enough of a rewrite to be worth confirming.
+    /// </summary>
+    [RelayCommand]
+    private Task FinishCurrentFlowBranchAsync() => RunAsync(async () =>
+    {
+        var branch = await repository.GetCurrentBranchAsync().ConfigureAwait(true);
+        if (branch is null)
+            return OperationResult.Fail("HEAD is detached, so there is no branch to finish.");
+
+        var config = await repository.Flow.GetConfigAsync().ConfigureAwait(true);
+        FlowBranchKind? kind = branch switch
+        {
+            _ when branch.StartsWith(config.FeaturePrefix, StringComparison.Ordinal) => FlowBranchKind.Feature,
+            _ when branch.StartsWith(config.ReleasePrefix, StringComparison.Ordinal) => FlowBranchKind.Release,
+            _ when branch.StartsWith(config.HotfixPrefix, StringComparison.Ordinal) => FlowBranchKind.Hotfix,
+            _ => null,
+        };
+
+        if (kind is not { } flowKind)
+            return OperationResult.Fail($"'{branch}' is not a git-flow branch.");
+
+        var targets = flowKind == FlowBranchKind.Feature
+            ? config.Develop
+            : $"{config.Main} and {config.Develop}";
+
+        var confirm = ConfirmAsync;
+        if (confirm is null ||
+            !await confirm($"Merge '{branch}' into {targets}, then delete it?").ConfigureAwait(true))
+            return OperationResult.Cancelled;
+
+        return await repository.Flow.FinishAsync(flowKind, branch).ConfigureAwait(true);
+    });
+
     // -------------------------------------------------------------- stash
 
     [RelayCommand]

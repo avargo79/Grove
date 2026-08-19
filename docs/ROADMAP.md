@@ -82,16 +82,24 @@ External diff and merge tool configuration was not built: conflict resolution al
 the user's own `merge.tool`, so a second place to configure it would only be another thing to get
 out of sync.
 
+## Closing the gaps ✅
+
+The three features that shipped in `GitFork.Core` without a way into them from the app:
+
+- [x] Repository file tree at any revision, with file contents and syntax colouring
+- [x] Git-flow start and finish for feature, release and hotfix branches
+- [x] Submodule listing and update, plus LFS tracked files and locks
+
 ## Still open
 
 Deliberately not built, and worth naming rather than leaving implied:
 
-- LFS, git-flow and the revision file tree are implemented and tested in `GitFork.Core` but have
-  no UI. They are reachable from code, not from the app.
 - Syntax highlighting is per-line, so a fragment beginning inside a multi-line block comment is
   not coloured as one.
 - The rebase sequence-editor script has a Windows branch that the suite does not exercise on a
   Mac.
+- The published Windows and Linux builds have not been run — only built. Only the macOS bundle
+  was launched and checked.
 
 ## Explicitly out of scope
 

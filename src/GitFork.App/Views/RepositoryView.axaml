@@ -41,6 +41,23 @@
                     </SplitButton>
                     <Button Content="Stash" Command="{Binding Commands.StashPushCommand}" />
                     <Button Name="ReflogButton" Content="Reflog" Click="OnReflogClicked" />
+                    <Button Name="FilesButton" Content="Files" Click="OnFilesClicked" />
+                    <Button Name="IntegrationsButton" Content="Modules" Click="OnIntegrationsClicked" />
+                    <Button Name="FlowButton" Content="Flow">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="Start a feature…"
+                                          Command="{Binding Commands.StartFeatureCommand}" />
+                                <MenuItem Header="Start a release…"
+                                          Command="{Binding Commands.StartReleaseCommand}" />
+                                <MenuItem Header="Start a hotfix…"
+                                          Command="{Binding Commands.StartHotfixCommand}" />
+                                <Separator />
+                                <MenuItem Header="Finish this branch…"
+                                          Command="{Binding Commands.FinishCurrentFlowBranchCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                     <Button Content="Refresh" Command="{Binding RefreshCommand}" />
                 </StackPanel>
 
@@ -280,6 +297,8 @@
                                                   CommandParameter="{Binding}" />
                                         <MenuItem Header="Interactive rebase from here…"
                                                   Click="OnInteractiveRebaseFromCommitClicked" />
+                                        <MenuItem Header="Browse files at this commit…"
+                                                  Click="OnBrowseFilesAtCommitClicked" />
                                         <Separator />
                                         <MenuItem Header="Reset current branch to here">
                                             <MenuItem Header="Soft — keep changes staged"

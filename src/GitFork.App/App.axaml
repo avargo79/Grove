@@ -248,6 +248,13 @@
             <Setter Property="Foreground" Value="{DynamicResource DeletedBrush}" />
         </Style>
 
+        <Style Selector="TextBlock.substate">
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.substate.attention">
+            <Setter Property="Foreground" Value="{DynamicResource ModifiedBrush}" />
+        </Style>
+
         <Style Selector="TextBlock.sectionheader">
             <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
             <Setter Property="FontSize" Value="11" />

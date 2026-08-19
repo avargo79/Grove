@@ -67,6 +67,12 @@ what was deliberately left out.
 - Reflog browser that flags commits no branch can reach, and recovers them onto a branch
 - Submodule listing and update
 
+**Browsing and integrations**
+
+- Repository file tree at any revision, with contents and syntax colouring
+- Git-flow start and finish for features, releases and hotfixes
+- Submodule listing and update, and LFS tracked files and locks
+
 **Getting around**
 
 - Several repositories open at once as tabs, with a recent list

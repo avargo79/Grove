@@ -48,6 +48,19 @@ public partial class RepositoryView : UserControl
             list.ScrollIntoView(selected);
     }
 
+    private void OnFilesClicked(object? sender, RoutedEventArgs e) =>
+        _ = Host?.OpenFileTreeAsync(DataContext as MainViewModel, "HEAD") ?? Task.CompletedTask;
+
+    private void OnIntegrationsClicked(object? sender, RoutedEventArgs e) =>
+        _ = Host?.OpenIntegrationsAsync(DataContext as MainViewModel) ?? Task.CompletedTask;
+
+    /// <summary>Browsing the tree as it was at one commit, rather than as it is now.</summary>
+    private void OnBrowseFilesAtCommitClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: CommitRowViewModel row })
+            _ = Host?.OpenFileTreeAsync(DataContext as MainViewModel, row.Sha);
+    }
+
     private void OnReflogClicked(object? sender, RoutedEventArgs e) =>
         _ = Host?.OpenReflogAsync(DataContext as MainViewModel) ?? Task.CompletedTask;
 
