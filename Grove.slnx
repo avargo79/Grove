@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Grove.App/Grove.App.csproj" />
+    <Project Path="src/Grove.Core/Grove.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Grove.App.Tests/Grove.App.Tests.csproj" />
+    <Project Path="tests/Grove.Core.Tests/Grove.Core.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Grove.App.ViewModels"
+        xmlns:views="using:Grove.App.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+        x:Class="Grove.App.Views.FileHistoryWindow"
+        x:DataType="vm:FileHistoryViewModel"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
+        Width="1100" Height="700"
+        Title="{Binding Title}">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="10,6"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <CheckBox Name="FollowRenamesToggle" Content="Follow renames" FontSize="11.5"
+                      IsChecked="{Binding FollowRenames, Mode=TwoWay}" />
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="10,4"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <TextBlock Name="HistoryStatus" Text="{Binding StatusText}"
+                       Foreground="{DynamicResource MutedBrush}" FontSize="11" />
+        </Border>
+
+        <Grid RowDefinitions="200,4,*">
+            <ListBox Grid.Row="0" Name="HistoryList" Classes="commits"
+                     ItemsSource="{Binding Entries}"
+                     SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                     Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="vm:FileHistoryEntryViewModel">
+                        <Grid ColumnDefinitions="*,150,110,70" VerticalAlignment="Center">
+                            <TextBlock Grid.Column="0" Text="{Binding Subject}" Margin="8,0,0,0"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding AuthorName}" FontSize="12"
+                                       Foreground="{DynamicResource MutedBrush}"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding DateDisplay}" FontSize="12"
+                                       ToolTip.Tip="{Binding DateTooltip}"
+                                       Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="3" Text="{Binding ShortSha}" FontSize="11.5"
+                                       FontFamily="{StaticResource MonoFont}"
+                                       Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <GridSplitter Grid.Row="1" Background="{DynamicResource BorderBrush}"
+                          HorizontalAlignment="Stretch" />
+
+            <views:DiffView Grid.Row="2" DataContext="{Binding Diff}" />
+        </Grid>
+    </DockPanel>
+</Window>

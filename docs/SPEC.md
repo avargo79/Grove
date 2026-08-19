@@ -1,4 +1,4 @@
-# git-gui — Specification
+# Grove — Specification
 
 A visual Git client for .NET, modelled on the interaction design of [Fork](https://git-fork.com/).
 
@@ -40,16 +40,16 @@ no GPL obligation. That was a deliberate choice — see §3.
 ## 3. Architecture
 
 ```
-GitGui.App  (Avalonia, MVVM)          — views, view models, custom graph renderer
+Grove.App  (Avalonia, MVVM)          — views, view models, custom graph renderer
       │  project reference
       ▼
-GitGui.Core (no UI dependencies)      — git process wrapper, parsers, graph layout
+Grove.Core (no UI dependencies)      — git process wrapper, parsers, graph layout
       │  Process.Start
       ▼
 git (the user's own binary)
 ```
 
-`GitGui.Core` deliberately references nothing from Avalonia. Everything it exposes is a plain
+`Grove.Core` deliberately references nothing from Avalonia. Everything it exposes is a plain
 record or interface, which is what makes the whole parsing and layout surface unit-testable without
 a UI harness.
 
@@ -268,7 +268,7 @@ Three layers:
   files, untracked directories and paths containing spaces. The write path is covered the same way:
   every staging test asserts on the resulting **index contents**, not on the patch text, so a patch
   that applies but stages the wrong thing still fails.
-- **Headless UI tests** in `GitGui.App.Tests` boot the real application on Avalonia's headless
+- **Headless UI tests** in `Grove.App.Tests` boot the real application on Avalonia's headless
   platform with Skia, so the actual XAML, styles and custom controls are exercised. They assert on
   the realised visual tree, on layout (does the file list still fit on screen?), and on captured
   pixels. `ScreenshotGenerator` reuses the same path to produce the images in this repository.

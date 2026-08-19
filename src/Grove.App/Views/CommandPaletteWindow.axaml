@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Grove.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="420"
+        x:Class="Grove.App.Views.CommandPaletteWindow"
+        x:DataType="vm:CommandPaletteViewModel"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
+        Width="560" Height="420"
+        WindowStartupLocation="CenterOwner"
+        WindowDecorations="BorderOnly"
+        Title="Commands">
+
+    <DockPanel Margin="1">
+        <TextBox DockPanel.Dock="Top" Name="PaletteQuery"
+                 Text="{Binding Query, Mode=TwoWay}"
+                 PlaceholderText="Type to search commands…"
+                 Margin="10" FontSize="14" />
+
+        <TextBlock DockPanel.Dock="Bottom" Margin="12,6"
+                   Text="Enter runs the highlighted command · Esc closes"
+                   Foreground="{DynamicResource DimBrush}" FontSize="11" />
+
+        <ListBox Name="PaletteList" Classes="flat"
+                 ItemsSource="{Binding Commands}"
+                 SelectedItem="{Binding SelectedCommand, Mode=TwoWay}"
+                 Background="Transparent" BorderThickness="0" Margin="6,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:PaletteCommand">
+                    <Grid ColumnDefinitions="*,Auto" Height="26">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Category}" FontSize="11"
+                                       Foreground="{DynamicResource DimBrush}" Width="90" />
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding Shortcut}" FontSize="11"
+                                   FontFamily="{StaticResource MonoFont}"
+                                   Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Grove.App.ViewModels"
+        xmlns:controls="using:Grove.App.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        x:Class="Grove.App.Views.BlameWindow"
+        x:DataType="vm:BlameViewModel"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource ForegroundBrush}"
+        Width="1000" Height="700"
+        Title="{Binding Title}">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Padding="10,4"
+                Background="{DynamicResource ToolbarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <TextBlock Name="BlameStatus" Text="{Binding StatusText}"
+                       Foreground="{DynamicResource MutedBrush}" FontSize="11" />
+        </Border>
+
+        <ListBox Name="BlameList" Classes="diff"
+                 ItemsSource="{Binding Lines}"
+                 Background="{DynamicResource RowBackgroundBrush}" BorderThickness="0"
+                 SelectionMode="Single"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:BlameLineViewModel">
+                    <StackPanel Orientation="Horizontal" ToolTip.Tip="{Binding ToolTip}">
+                        <TextBlock Text="{Binding Sha}" Width="66"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="11"
+                                   Foreground="{DynamicResource AccentBrush}" Padding="4,0,0,0" />
+                        <TextBlock Text="{Binding Author}" Width="120"
+                                   FontSize="11" Foreground="{DynamicResource MutedBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Date}" Width="90"
+                                   FontSize="11" Foreground="{DynamicResource DimBrush}" />
+                        <TextBlock Text="{Binding Number}"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="11.5"
+                                   Foreground="{DynamicResource DiffGutterBrush}" Padding="0,0,10,0" />
+                        <controls:DiffTextBlock Runs="{Binding Runs}"
+                                                FontFamily="{StaticResource MonoFont}" FontSize="11.5" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

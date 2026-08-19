@@ -1,4 +1,4 @@
-# git-gui
+# Grove
 
 A visual Git client for .NET, modelled on [Fork](https://git-fork.com/) — built so the same
 workflow is available under an MIT licence with no procurement barrier.
@@ -6,7 +6,7 @@ workflow is available under an MIT licence with no procurement barrier.
 Cross-platform (Windows, macOS, Linux) via Avalonia. Talks to your own `git` binary, so it honours
 your existing config, credential helpers, hooks and LFS setup exactly.
 
-![git-gui showing a repository's commit graph, detail pane and diff](docs/screenshot.png)
+![Grove showing a repository's commit graph, detail pane and diff](docs/screenshot.png)
 
 The staging pane, with hunk- and line-level staging:
 
@@ -85,7 +85,7 @@ what was deliberately left out.
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and `git` on your `PATH`.
 
 ```bash
-dotnet run --project src/GitGui.App
+dotnet run --project src/Grove.App
 ```
 
 Then use **Open Repository…** and pick any folder inside a git work tree.
@@ -117,16 +117,16 @@ run the real `git` binary against them.
 Every screenshot above is generated headlessly, so they can be refreshed without launching the app:
 
 ```bash
-GITGUI_SCREENSHOT=docs/screenshot.png GITGUI_SCREENSHOT_REPO=/path/to/repo dotnet test tests/GitGui.App.Tests --filter WriteScreenshot
+GROVE_SCREENSHOT=docs/screenshot.png GROVE_SCREENSHOT_REPO=/path/to/repo dotnet test tests/Grove.App.Tests --filter WriteScreenshot
 ```
 
-`GITGUI_SCREENSHOT_THEME=light` captures the light palette, and `GITGUI_SCREENSHOT_VIEW` picks the
+`GROVE_SCREENSHOT_THEME=light` captures the light palette, and `GROVE_SCREENSHOT_VIEW` picks the
 pane: `working` for the staging view, `sidebyside` for the two-column diff. Any other value is an
 error rather than a silent fall-back, so a typo cannot overwrite one screenshot with another. The
 conflict banner builds its own throwaway repository:
 
 ```bash
-GITGUI_SCREENSHOT_CONFLICT=docs/screenshot-conflict.png dotnet test tests/GitGui.App.Tests --filter WriteConflictScreenshot
+GROVE_SCREENSHOT_CONFLICT=docs/screenshot-conflict.png dotnet test tests/Grove.App.Tests --filter WriteConflictScreenshot
 ```
 
 ## Static analysis
@@ -142,17 +142,17 @@ SONAR_TOKEN=… SONAR_HOST_URL=… ./scripts/sonar-scan.sh
 ## Layout
 
 ```
-src/GitGui.Core   git process wrapper, output parsers, commit-graph layout (no UI dependencies)
-src/GitGui.App    Avalonia views, view models, custom graph renderer
-tests/GitGui.Core.Tests  parser, graph-layout and real-git integration tests
-tests/GitGui.App.Tests   headless Avalonia tests that render the window and inspect pixels
+src/Grove.Core   git process wrapper, output parsers, commit-graph layout (no UI dependencies)
+src/Grove.App    Avalonia views, view models, custom graph renderer
+tests/Grove.Core.Tests  parser, graph-layout and real-git integration tests
+tests/Grove.App.Tests   headless Avalonia tests that render the window and inspect pixels
 docs/SPEC.md       architecture and design rationale
 docs/ROADMAP.md    milestone plan
 ```
 
 ## Credentials
 
-git-gui never handles your credentials. Git is run with terminal prompting disabled, so
+Grove never handles your credentials. Git is run with terminal prompting disabled, so
 authentication comes from your existing credential helper or SSH key — and a missing credential
 fails immediately with an explanation instead of hanging.
 

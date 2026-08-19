@@ -38,7 +38,7 @@ case "$RID" in
 
     # Trimming is deliberately off: Avalonia resolves a good deal by reflection, and a trimmed
     # build fails at runtime rather than at build time.
-    dotnet publish src/GitGui.App \
+    dotnet publish src/Grove.App \
       --configuration Release \
       --runtime "$RID" \
       --self-contained true \
@@ -46,7 +46,7 @@ case "$RID" in
       -p:PublishTrimmed=false \
       --output "$STAGE"
 
-    APP="$OUT/git-gui.app"
+    APP="$OUT/Grove.app"
     mkdir -p "$APP/Contents/MacOS"
 
     cat > "$APP/Contents/Info.plist" <<'PLIST'
@@ -54,13 +54,13 @@ case "$RID" in
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>git-gui</string>
-  <key>CFBundleDisplayName</key><string>git-gui</string>
-  <key>CFBundleIdentifier</key><string>com.gitgui.app</string>
+  <key>CFBundleName</key><string>Grove</string>
+  <key>CFBundleDisplayName</key><string>Grove</string>
+  <key>CFBundleIdentifier</key><string>com.grove.app</string>
   <key>CFBundleVersion</key><string>1.0</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleExecutable</key><string>GitGui.App</string>
+  <key>CFBundleExecutable</key><string>Grove.App</string>
   <key>LSMinimumSystemVersion</key><string>11.0</string>
   <key>NSHighResolutionCapable</key><true/>
 </dict>
@@ -80,7 +80,7 @@ PLIST
     ;;
 
   *)
-    dotnet publish src/GitGui.App \
+    dotnet publish src/Grove.App \
       --configuration Release \
       --runtime "$RID" \
       --self-contained true \
