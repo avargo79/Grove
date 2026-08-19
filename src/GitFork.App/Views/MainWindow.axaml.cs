@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using GitFork.App.ViewModels;
 
@@ -56,6 +57,55 @@ public partial class MainWindow : Window
         window.Show(this);
 
         await viewModel.LoadAsync(file.Change.Path);
+    }
+
+    private void OnReflogClicked(object? sender, RoutedEventArgs e) => _ = OpenReflogAsync();
+
+    private async Task OpenReflogAsync()
+    {
+        if (DataContext is not MainViewModel { Repository: { } repository } main)
+            return;
+
+        var viewModel = new ViewModels.ReflogViewModel(repository)
+        {
+            ConfirmAsync = ConfirmAsync,
+            PromptAsync = PromptAsync,
+        };
+        viewModel.RepositoryChanged += (_, _) => _ = main.RefreshCommand.ExecuteAsync(null);
+
+        var window = new ReflogWindow { DataContext = viewModel };
+        window.Show(this);
+        await viewModel.LoadAsync();
+    }
+
+    /// <summary>Rebase onto the ref that was right-clicked in the sidebar.</summary>
+    private void OnInteractiveRebaseFromRefClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: ViewModels.SidebarItemViewModel item })
+            _ = OpenRebaseEditorAsync(item.Ref.ShortName);
+    }
+
+    /// <summary>
+    /// Rebase the commits above the one that was right-clicked, which is what "from here" means:
+    /// that commit becomes the upstream everything after it is replayed onto.
+    /// </summary>
+    private void OnInteractiveRebaseFromCommitClicked(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: ViewModels.CommitRowViewModel row })
+            _ = OpenRebaseEditorAsync(row.Sha);
+    }
+
+    private async Task OpenRebaseEditorAsync(string upstream)
+    {
+        if (DataContext is not MainViewModel { Repository: { } repository } main)
+            return;
+
+        var viewModel = new ViewModels.RebaseEditorViewModel(repository) { ConfirmAsync = ConfirmAsync };
+        viewModel.RepositoryChanged += (_, _) => _ = main.RefreshCommand.ExecuteAsync(null);
+
+        var window = new RebaseEditorWindow { DataContext = viewModel };
+        window.Show(this);
+        await viewModel.LoadAsync(upstream);
     }
 
     /// <summary>Selecting the pinned row hands the lower pane to the working copy.</summary>

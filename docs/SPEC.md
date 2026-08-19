@@ -177,7 +177,25 @@ A debounced `RepositoryWatcher` watches the work tree and `.git`, coalescing bur
 autosaves, git's multi-file writes) into a single reload. The work-tree watcher ignores `.git`
 entirely — the dedicated watcher covers it, and git's lock files would otherwise fire constantly.
 
-### 3.7 Threading
+### 3.7 Interactive rebase
+
+Git expects a human to edit the plan file it writes. Rather than opening an editor,
+`GIT_SEQUENCE_EDITOR` is pointed at a generated script whose only job is to overwrite that file
+with the plan built in the UI.
+
+Two things this depends on, both of which caught the implementation out first:
+
+- **The environment beats config.** Setting `sequence.editor` per invocation does nothing, because
+  this codebase pins `GIT_SEQUENCE_EDITOR=true` for every call (see §3.4) and the environment wins.
+  The override goes through `RunWithEnvironmentAsync` instead.
+- **Exit code 0 does not mean finished.** Git exits successfully when it stops at an `edit`: a
+  deliberate pause, not a failure. The repository state has to be consulted either way, or a paused
+  rebase is reported as a completed one.
+
+`reword` is written to the plan as `edit` for the same reason editors are suppressed everywhere
+else — git's reword opens one, and silently keeping the old message would be worse than stopping.
+
+### 3.8 Threading
 
 All git calls are async over `Process`. Selection changes cancel the in-flight detail/diff load
 through a `CancellationTokenSource`, so holding an arrow key down does not queue up work.
@@ -196,6 +214,10 @@ through a `CancellationTokenSource`, so holding an arrow key down does not queue
 | `GitRemote` | `git remote -v` |
 | `BlameLine` | `git blame --porcelain` |
 | `TreeEntry` | `git ls-tree -r --long -z` |
+| `ReflogEntry` | `git reflog --no-abbrev --format=…` |
+| `RebaseTodoItem` | `git log --reverse --no-merges` |
+| `SignatureStatus` | `git log --format=%H %G?` |
+| `Submodule` | `git submodule status --recursive` |
 | `FileDiff` / `DiffHunk` | `git diff [--cached] -M` → `DiffParser.ParseFiles` |
 
 The stash list comes from `git stash list` rather than `git for-each-ref`, because the latter only
@@ -234,8 +256,10 @@ SonarQube or SonarCloud instance when one is configured.
 - The graph is built over the commits actually returned, so parents beyond the cap render as
   dangling lane ends.
 - Diffs are text-only; image diffs are on the roadmap, not implemented.
-- Interactive rebase and the reflog browser are not implemented yet (M5).
-- The revision tree is available in Core but has no UI yet.
+- LFS, git-flow, signature status and the revision tree are implemented and tested in Core but
+  have no UI yet.
+- The rebase sequence-editor script is written per platform (a shell script, or a batch file on
+  Windows); only the Unix path is covered by the test suite on this machine.
 - Syntax highlighting is per-line and extension-based; it will not colour a fragment that begins
   inside a multi-line block comment.
 - Conflict resolution hands off to the user's own editor or `merge.tool`; there is no built-in

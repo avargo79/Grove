@@ -22,8 +22,8 @@ A conflicted merge, with the way out offered up front:
 
 ## Current state
 
-Milestones 1 to 4 are complete: browsing history, the full staging and commit loop, branching,
-merging and remote operations, and the deeper diff and history views.
+Milestones 1 to 5 are complete: browsing history, the full staging and commit loop, branching,
+merging and remote operations, the deeper diff and history views, and the advanced workflows.
 
 **Browsing**
 
@@ -57,7 +57,13 @@ merging and remote operations, and the deeper diff and history views.
 - Blame with per-line attribution, and per-file history that follows renames
 - Image diffs shown before and after
 
-Interactive rebase and the reflog browser are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Rewriting and recovering**
+
+- Interactive rebase: reorder, squash, fixup, edit and drop, with nothing touched until you start
+- Reflog browser that flags commits no branch can reach, and recovers them onto a branch
+- Submodule listing and update
+
+Multi-repository tabs, search and a light theme are next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Running it
 

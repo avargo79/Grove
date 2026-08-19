@@ -96,6 +96,9 @@
         <Style Selector="Border.badge.remote">
             <Setter Property="Background" Value="{StaticResource BadgeRemoteBrush}" />
         </Style>
+        <Style Selector="Border.badge.unreachable">
+            <Setter Property="Background" Value="#6B3A2A" />
+        </Style>
         <Style Selector="Border.badge.tag">
             <Setter Property="Background" Value="{StaticResource BadgeTagBrush}" />
         </Style>
@@ -162,6 +165,25 @@
             <Setter Property="Foreground" Value="{StaticResource DeletedBrush}" />
         </Style>
         <Style Selector="TextBlock.opstatus.conflict">
+            <Setter Property="Foreground" Value="{StaticResource ModifiedBrush}" />
+        </Style>
+
+        <!-- Rebase plan rows: the chosen action changes how the subject reads. -->
+        <Style Selector="TextBlock.rebasesubject.dropped">
+            <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+            <Setter Property="TextDecorations" Value="Strikethrough" />
+        </Style>
+        <Style Selector="TextBlock.rebasesubject.combined">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.rebasesubject.stops">
+            <Setter Property="Foreground" Value="{StaticResource ModifiedBrush}" />
+        </Style>
+
+        <Style Selector="TextBlock.reflogaction">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+        </Style>
+        <Style Selector="TextBlock.reflogaction.destructive">
             <Setter Property="Foreground" Value="{StaticResource ModifiedBrush}" />
         </Style>
 

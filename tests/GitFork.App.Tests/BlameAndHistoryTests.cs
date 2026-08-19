@@ -194,7 +194,7 @@ public class BlameAndHistoryTests
         Assert.Equal(2, vm.Entries.Count);
 
         vm.FollowRenames = false;
-        await Task.Delay(100, TestContext.Current.CancellationToken);
+        await vm.PendingLoad;
 
         Assert.Single(vm.Entries);
     }

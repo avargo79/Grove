@@ -1,0 +1,77 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GitFork.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
+        x:Class="GitFork.App.Views.ReflogWindow"
+        x:DataType="vm:ReflogViewModel"
+        Background="{StaticResource WindowBackgroundBrush}"
+        Foreground="{StaticResource ForegroundBrush}"
+        Width="900" Height="600"
+        WindowStartupLocation="CenterOwner"
+        Title="Reflog">
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="12,8"
+                Background="{StaticResource ToolbarBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <CheckBox Name="UnreachableToggle" Content="Only unreachable commits" FontSize="11.5"
+                          IsChecked="{Binding ShowOnlyUnreachable, Mode=TwoWay}" />
+                <TextBlock Text="Everything HEAD has pointed at, including commits no branch can reach."
+                           Foreground="{StaticResource MutedBrush}" FontSize="11.5"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="12,6"
+                Background="{StaticResource ToolbarBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <TextBlock Grid.Column="0" Name="ReflogStatus" Text="{Binding StatusText}"
+                           Foreground="{StaticResource MutedBrush}" FontSize="11"
+                           VerticalAlignment="Center" />
+                <Button Grid.Column="1" Name="CheckoutButton" Content="Checkout"
+                        Command="{Binding CheckoutCommand}" CommandParameter="{Binding SelectedEntry}" />
+                <Button Grid.Column="2" Name="BranchHereButton" Content="Branch Here…" Margin="6,0"
+                        Command="{Binding CreateBranchCommand}" CommandParameter="{Binding SelectedEntry}" />
+                <Button Grid.Column="3" Name="ResetHereButton" Content="Reset Here…"
+                        Command="{Binding ResetToCommand}" CommandParameter="{Binding SelectedEntry}" />
+            </Grid>
+        </Border>
+
+        <ListBox Name="ReflogList" Classes="commits"
+                 ItemsSource="{Binding Entries}"
+                 SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                 Background="{StaticResource RowBackgroundBrush}" BorderThickness="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:ReflogEntryViewModel">
+                    <Grid ColumnDefinitions="110,70,110,*,110" VerticalAlignment="Center"
+                          ToolTip.Tip="{Binding ToolTip}">
+                        <TextBlock Grid.Column="0" Text="{Binding Selector}" Margin="8,0,0,0"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="11"
+                                   Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding ShortSha}"
+                                   FontFamily="{StaticResource MonoFont}" FontSize="11.5"
+                                   Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{Binding Action}" FontSize="11.5"
+                                   VerticalAlignment="Center"
+                                   Classes="reflogaction"
+                                   Classes.destructive="{Binding IsPotentiallyDestructive}" />
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6"
+                                    VerticalAlignment="Center">
+                            <Border Classes="badge unreachable" IsVisible="{Binding IsUnreachable}">
+                                <TextBlock Text="unreachable" FontSize="10.5" />
+                            </Border>
+                            <TextBlock Text="{Binding Subject}" TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="4" Text="{Binding DateDisplay}" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

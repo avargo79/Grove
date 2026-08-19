@@ -44,6 +44,9 @@ public sealed partial class FileHistoryViewModel(GitRepository repository) : Vie
     /// <summary>The in-flight diff load, exposed so tests can await selection side effects.</summary>
     internal Task PendingDiffLoad { get; private set; } = Task.CompletedTask;
 
+    /// <summary>The in-flight reload, so callers can await a toggle deterministically.</summary>
+    internal Task PendingLoad { get; private set; } = Task.CompletedTask;
+
     public async Task LoadAsync(string path, CancellationToken ct = default)
     {
         Path = path;
@@ -68,7 +71,7 @@ public sealed partial class FileHistoryViewModel(GitRepository repository) : Vie
         PendingDiffLoad = LoadDiffAsync(value);
     }
 
-    partial void OnFollowRenamesChanged(bool value) => _ = LoadAsync(Path);
+    partial void OnFollowRenamesChanged(bool value) => PendingLoad = LoadAsync(Path);
 
     private async Task LoadDiffAsync(FileHistoryEntryViewModel? entry)
     {

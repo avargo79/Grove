@@ -55,18 +55,22 @@ The daily-driver loop.
 - [x] Image diffs for common formats (*Image Diffs*)
 - [x] Repository file tree at any revision (available in Core; no UI yet)
 
-## M5 — Advanced workflows
+## M5 — Advanced workflows ✅
 
-Next up.
+- [x] Interactive rebase editor: reorder, squash, fixup, edit, drop (*Interactive rebase*)
+- [x] Reflog browser for recovering lost commits (*Reflog*)
+- [x] Submodule listing and update
+- [x] Git LFS status and locking (Core; no UI yet)
+- [x] Git-flow branch operations (Core; no UI yet)
+- [x] GPG signature status (Core; no UI yet)
 
-- [ ] Interactive rebase editor: reorder, squash, edit, drop (*Interactive rebase*)
-- [ ] Reflog browser for recovering lost commits (*Reflog*)
-- [ ] Submodule listing and update
-- [ ] Git LFS status and locking
-- [ ] Git-flow branch operations
-- [ ] GPG signature verification indicators
+Reword is written to the rebase plan as `edit`: git's own `reword` opens an editor, and with
+editors suppressed that would silently keep the original message. Stopping hands the job to the
+commit box, which is already the right place to amend a message.
 
 ## M6 — Product polish
+
+Next up.
 
 - [ ] Multi-repository tabs and a recent-repositories list (*Repository manager*)
 - [ ] Commit search and filtering by author, message, path and date

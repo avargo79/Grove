@@ -52,6 +52,7 @@
                         </SplitButton.Flyout>
                     </SplitButton>
                     <Button Content="Stash" Command="{Binding Commands.StashPushCommand}" />
+                    <Button Name="ReflogButton" Content="Reflog" Click="OnReflogClicked" />
                     <Button Content="Refresh" Command="{Binding RefreshCommand}" />
                 </StackPanel>
 
@@ -155,6 +156,9 @@
                                                                       IsVisible="{Binding CanBeMergedIn}"
                                                                       Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.RebaseOntoRefCommand}"
                                                                       CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Interactive rebase onto this…"
+                                                                      IsVisible="{Binding CanBeMergedIn}"
+                                                                      Click="OnInteractiveRebaseFromRefClicked" />
                                                             <Separator IsVisible="{Binding IsLocalBranch}" />
                                                             <MenuItem Header="Rename…"
                                                                       IsVisible="{Binding IsLocalBranch}"
@@ -261,6 +265,8 @@
                                         <MenuItem Header="Revert"
                                                   Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).Commands.RevertCommand}"
                                                   CommandParameter="{Binding}" />
+                                        <MenuItem Header="Interactive rebase from here…"
+                                                  Click="OnInteractiveRebaseFromCommitClicked" />
                                         <Separator />
                                         <MenuItem Header="Reset current branch to here">
                                             <MenuItem Header="Soft — keep changes staged"
